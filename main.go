@@ -14,14 +14,5 @@ func main() {
 		fmt.Println("Bollocks got error")
 	}
 
-	/*notes, err:= scribedb.GetPinnedNotes()
-	if err != nil{
-		fmt.Println("%", err)
-		return
-	}
-
-	fmt.Printf("Got %d pinned notes\n", len(notes))
-	*/
 	ui.StartUI()
-
 }

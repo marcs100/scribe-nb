@@ -11,13 +11,19 @@ import (
 
 
 func GetPinnedNotes() ([]NoteData, error){
-	var query string = "select * from notes where pinned = 1"
+	var query string = "select * from notes where pinned = 1 order by modified desc"
 	return getNotes(query)
 }
 
 
 func GetNotebook(notebookName string) ([]NoteData, error){
-	var query string = fmt.Sprintf("select * from notes where notebook = %s", notebookName)
+	var query string = fmt.Sprintf("select * from notes where notebook = '%s'", notebookName)
+	return getNotes(query)
+}
+
+
+func GetRecentNotes(noteCount int) ([]NoteData, error){
+	var query string = fmt.Sprintf("select * from notes order by modified desc LIMIT %d", noteCount)
 	return getNotes(query)
 }
 
