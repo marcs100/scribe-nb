@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/theme"
-	"fmt"
+	//"fmt"
 )
 
 
@@ -29,45 +29,79 @@ func CreateMainWindow(app fyne.App){
 
 	mainWindow := app.NewWindow("Scribe-NB")
 
-	//What is the current them style (variant) - light or dark?
-	themeVariant := app.Settings().ThemeVariant()
-	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
-	modDarkColour,_ := RGBStringToFyneColor("#373737")
-	modLightColour,_ := RGBStringToFyneColor("#e2e2e2")
-	modSideDarkColour,_ := RGBStringToFyneColor("#232323")
-	modSideLightColour,_ := RGBStringToFyneColor("#f7e5e5")
-
-
-	if themeVariant == theme.VariantLight{
-		fmt.Println("The current theme is light.")
-	} else if  themeVariant == theme.VariantDark{
-		fmt.Println("The current theme is dark.")
-	} else{
-		fmt.Println("Could not detect theme variant")
-	}
-
-
 	// Options that wil be part of config file ************************
 	noteSize := fyne.NewSize(500,400) //this should depend on resolution of current display
 	recentNotesLimit := 6
 	initialView := "Recent"
 	//**************************************************************
-	//lets try adding a side pane
-	/*
-	"": {"A"},
-	"A": {"B", "D"},
-	"B": {"C"},
-	"C": {"abc"},
-	"D": {"E"},
-	"E": {"F", "G"},
-	*/
+
+	//Main Grid container for displaying notes
+	grid = container.New(layout.NewGridWrapLayout(noteSize))
 
 	nodes := map[string][]string{
 		"": {"Views"},
 		"Views": {"Pinned", "Recent", "Notebooks"},
 	}
-
 	viewsTree = widget.NewTreeWithStrings(nodes)
+
+	//Create the side panel
+	side := CreateSidePanel(app, viewsTree, grid, noteSize, recentNotesLimit)
+
+	//Create The main panel
+	main := CreateMainPanel(app, grid)
+
+	//layout the main window
+	appContainer := container.NewBorder(nil, nil, side, nil, main)
+
+	mainWindow.SetContent(appContainer)
+	mainWindow.Resize(fyne.NewSize(2000,1200))
+
+	//Make the tree selection correspond to the initial view
+	viewsTree.Select(initialView)
+
+	mainWindow.ShowAndRun()
+}
+
+
+func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
+
+	themeVariant := app.Settings().ThemeVariant()
+	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
+	modDarkColour,_ := RGBStringToFyneColor("#373737")
+	modLightColour,_ := RGBStringToFyneColor("#e2e2e2")
+
+	mainContainer := container.NewScroll(grid)
+	mainBackground := canvas.NewRectangle(themeColour)
+	if themeVariant == theme.VariantDark{
+		mainBackground = canvas.NewRectangle(modDarkColour)
+	} else if themeVariant == theme.VariantLight{
+		mainBackground = canvas.NewRectangle(modLightColour)
+	}
+	mainStackedContainer := container.NewStack(mainBackground, mainContainer)
+
+	return mainStackedContainer
+}
+
+
+func CreateSidePanel(app fyne.App, viewsTree *widget.Tree, grid *fyne.Container, noteSize fyne.Size, recentNotesLimit int)(*fyne.Container){
+
+	themeVariant := app.Settings().ThemeVariant()
+	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
+
+	modSideDarkColour,_ := RGBStringToFyneColor("#232323")
+	modSideLightColour,_ := RGBStringToFyneColor("#f7e5e5")
+
+	//lets try adding a side pane
+	/*
+	 " ": {"A"},                                                               *
+	 "A": {"B", "D"},
+	 "B": {"C"},
+	 "C": {"abc"},
+	 "D": {"E"},
+	 "E": {"F", "G"},
+	 */
+
+
 	viewsTree.OnSelected = func(id string) {
 		println("Selected:", id)
 		switch id{
@@ -101,25 +135,7 @@ func CreateMainWindow(app fyne.App){
 
 	sideStackedContainer := container.NewStack(sideColourRect, sideContainer)
 
-	//Display notes in a grid
-	grid = container.New(layout.NewGridWrapLayout(noteSize))
-	mainContainer := container.NewScroll(grid)
-	mainBackground := canvas.NewRectangle(themeColour)
-	if themeVariant == theme.VariantDark{
-		mainBackground = canvas.NewRectangle(modDarkColour)
-	} else if themeVariant == theme.VariantLight{
-		mainBackground = canvas.NewRectangle(modLightColour)
-	}
-	mainStackedContainer := container.NewStack(mainBackground, mainContainer)
-	appContainer := container.NewBorder(nil, nil, sideStackedContainer, nil, mainStackedContainer)
-	//appContainer := container.NewHSplit(sideContainer, mainContainer)
-	mainWindow.SetContent(appContainer)
-	mainWindow.Resize(fyne.NewSize(2000,1200))
-
-	//Make the tree selection correspond to the initial view
-	viewsTree.Select(initialView)
-
-	mainWindow.ShowAndRun()
+	return sideStackedContainer
 }
 
 
