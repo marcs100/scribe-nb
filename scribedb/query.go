@@ -21,6 +21,11 @@ func GetNotebook(notebookName string) ([]NoteData, error){
 	return getNotes(query)
 }
 
+func GetNotebooks() ([]string, error){
+	var query string = fmt.Sprintf("select distinct notebook from notes order by id desc")
+	return getColumn(query)
+}
+
 
 func GetRecentNotes(noteCount int) ([]NoteData, error){
 	var query string = fmt.Sprintf("select * from notes order by modified desc LIMIT %d", noteCount)
@@ -29,6 +34,31 @@ func GetRecentNotes(noteCount int) ([]NoteData, error){
 
 
 //************ Private functions ************************
+
+//use to get a single column as list of strungs
+func getColumn(query string)([]string, error){
+	if !connected{
+		return nil, errors.New("GetPinnedNotes: database not connected")
+	}
+
+	rows, err := db.Query(query)
+	var fields []string
+	defer rows.Close()
+	for rows.Next(){
+		var field string
+		err := rows.Scan(&field)
+
+		if err != nil{
+			return nil, err
+		}
+
+		fields = append(fields, field)
+	}
+
+	return fields, err
+}
+
+
 
 func getNotes(query string)([]NoteData, error){
 	if !connected{

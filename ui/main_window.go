@@ -13,9 +13,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/theme"
-	//"fmt"
+	"fmt"
 )
-
 
 func StartUI(){
 
@@ -26,6 +25,9 @@ func StartUI(){
 func CreateMainWindow(app fyne.App){
 	var grid *fyne.Container
 	var viewsTree *widget.Tree
+	var notebooksTree *widget.Tree
+	var notebooks []string //maintain a list of notebook names
+	//var tags []string //maintain a list of tags
 
 	mainWindow := app.NewWindow("Scribe-NB")
 
@@ -44,8 +46,18 @@ func CreateMainWindow(app fyne.App){
 	}
 	viewsTree = widget.NewTreeWithStrings(nodes)
 
+
+	notebooks,_ = scribedb.GetNotebooks()
+	nb_nodes := map[string][]string{
+		"": {"notebooks"},
+		"Notebooks": {},
+	}
+
+	nb_nodes["notebooks"] = notebooks
+	notebooksTree = widget.NewTreeWithStrings(nb_nodes)
+
 	//Create the side panel
-	side := CreateSidePanel(app, viewsTree, grid, noteSize, recentNotesLimit)
+	side := CreateSidePanel(app, viewsTree, notebooksTree, grid, noteSize, recentNotesLimit)
 
 	//Create The main panel
 	main := CreateMainPanel(app, grid)
@@ -83,7 +95,12 @@ func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
 }
 
 
-func CreateSidePanel(app fyne.App, viewsTree *widget.Tree, grid *fyne.Container, noteSize fyne.Size, recentNotesLimit int)(*fyne.Container){
+func CreateSidePanel(app fyne.App,
+		     viewsTree *widget.Tree,
+		     notebooksTree *widget.Tree,
+		     grid *fyne.Container,
+		     noteSize fyne.Size,
+		     recentNotesLimit int)(*fyne.Container){
 
 	themeVariant := app.Settings().ThemeVariant()
 	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
@@ -100,7 +117,6 @@ func CreateSidePanel(app fyne.App, viewsTree *widget.Tree, grid *fyne.Container,
 	 "D": {"E"},
 	 "E": {"F", "G"},
 	 */
-
 
 	viewsTree.OnSelected = func(id string) {
 		println("Selected:", id)
@@ -122,8 +138,20 @@ func CreateSidePanel(app fyne.App, viewsTree *widget.Tree, grid *fyne.Container,
 
 	viewsTree.OpenAllBranches()
 
-	sideContainer := container.NewScroll(viewsTree)
-	sideContainer.SetMinSize(fyne.NewSize(200,200))
+	scrollTreeView := container.NewScroll(viewsTree)
+	scrollTreeView.SetMinSize(fyne.NewSize(200,200))
+
+	scrollTreeNotebooks := container.NewScroll(notebooksTree)
+	scrollTreeNotebooks.SetMinSize(fyne.NewSize(200,200))
+
+	notebooksTree.OpenAllBranches()
+
+	newNoteButton := widget.NewButton("New Note",func(){
+		fmt.Println("New Note button pressed!")
+	})
+
+	spacerLabel := widget.NewLabel(" ")
+	sideVBoxContainer := container.NewVBox(newNoteButton,spacerLabel, scrollTreeView, scrollTreeNotebooks)
 
 	// set a background for the side pane depending on theme variant (light or dark)
 	sideColourRect := canvas.NewRectangle(themeColour)
@@ -133,7 +161,7 @@ func CreateSidePanel(app fyne.App, viewsTree *widget.Tree, grid *fyne.Container,
 		sideColourRect = canvas.NewRectangle(modSideLightColour)
 	}
 
-	sideStackedContainer := container.NewStack(sideColourRect, sideContainer)
+	sideStackedContainer := container.NewStack(sideColourRect, sideVBoxContainer)
 
 	return sideStackedContainer
 }

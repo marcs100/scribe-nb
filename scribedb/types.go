@@ -9,3 +9,7 @@ type NoteData struct{
 	Pinned uint
 	BackgroundColour string
 }
+
+
+
+
