@@ -141,10 +141,10 @@ func CreateSidePanel(app fyne.App,
 	scrollTreeView := container.NewScroll(viewsTree)
 	scrollTreeView.SetMinSize(fyne.NewSize(200,200))
 
-	scrollTreeNotebooks := container.NewScroll(notebooksTree)
-	scrollTreeNotebooks.SetMinSize(fyne.NewSize(200,200))
+	scrollTreeNotebooks := container.NewVScroll(notebooksTree)
+	scrollTreeNotebooks.SetMinSize(fyne.NewSize(200,500))
 
-	notebooksTree.OpenAllBranches()
+	//notebooksTree.OpenAllBranches()
 
 	newNoteButton := widget.NewButton("New Note",func(){
 		fmt.Println("New Note button pressed!")
@@ -161,11 +161,10 @@ func CreateSidePanel(app fyne.App,
 		sideColourRect = canvas.NewRectangle(modSideLightColour)
 	}
 
-	sideStackedContainer := container.NewStack(sideColourRect, sideVBoxContainer)
+	sideStackedContainer := container.NewStack(sideColourRect,sideVBoxContainer)
 
 	return sideStackedContainer
 }
-
 
 func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize fyne.Size){
 	grid.RemoveAll()
