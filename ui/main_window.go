@@ -10,11 +10,17 @@ import (
 
 	//"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
+	//"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/theme"
-	"fmt"
+	 _"fmt"
 )
+
+var listPanel *fyne.Container
+var grid *fyne.Container
+var noteSize fyne.Size = fyne.NewSize(500,400) //default note size, may be overidden by user prefs
+var recentNotesLimit = 6 //default,  may be overidden by user prefs
+
 
 func StartUI(){
 
@@ -23,44 +29,29 @@ func StartUI(){
 }
 
 func CreateMainWindow(app fyne.App){
-	var grid *fyne.Container
-	var viewsTree *widget.Tree
-	var notebooksTree *widget.Tree
-	var notebooks []string //maintain a list of notebook names
-	//var tags []string //maintain a list of tags
 
 	mainWindow := app.NewWindow("Scribe-NB")
 
 	// Options that wil be part of config file ************************
-	noteSize := fyne.NewSize(500,400) //this should depend on resolution of current display
-	recentNotesLimit := 6
-	initialView := "Recent"
+	noteSize = fyne.NewSize(500,400) //this should depend on resolution of current display
+	recentNotesLimit = 6
+	//initialView := "Recent"
 	//**************************************************************
 
 	//Main Grid container for displaying notes
-	grid = container.New(layout.NewGridWrapLayout(noteSize))
+	//grid = container.New(layout.NewGridWrapLayout(noteSize))
 
-	nodes := map[string][]string{
-		"": {"Views"},
-		"Views": {"Pinned", "Recent", "Notebooks"},
-	}
-	viewsTree = widget.NewTreeWithStrings(nodes)
-
-
-	notebooks,_ = scribedb.GetNotebooks()
-	nb_nodes := map[string][]string{
-		"": {"notebooks"},
-		"Notebooks": {},
-	}
-
-	nb_nodes["notebooks"] = notebooks
-	notebooksTree = widget.NewTreeWithStrings(nb_nodes)
+	grid = container.NewGridWrap(noteSize)
 
 	//Create the side panel
-	side := CreateSidePanel(app, viewsTree, notebooksTree, grid, noteSize, recentNotesLimit)
+	//side := CreateSidePanel()
+	//SIDE PANEL-------------------------------------------------
+
 
 	//Create The main panel
 	main := CreateMainPanel(app, grid)
+
+	side := CreateSidePanel()
 
 	//layout the main window
 	appContainer := container.NewBorder(nil, nil, side, nil, main)
@@ -68,8 +59,6 @@ func CreateMainWindow(app fyne.App){
 	mainWindow.SetContent(appContainer)
 	mainWindow.Resize(fyne.NewSize(2000,1200))
 
-	//Make the tree selection correspond to the initial view
-	viewsTree.Select(initialView)
 
 	mainWindow.ShowAndRun()
 }
@@ -79,7 +68,7 @@ func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
 
 	themeVariant := app.Settings().ThemeVariant()
 	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
-	modDarkColour,_ := RGBStringToFyneColor("#373737")
+	modDarkColour,_ := RGBStringToFyneColor("#2f2f2f")
 	modLightColour,_ := RGBStringToFyneColor("#e2e2e2")
 
 	mainContainer := container.NewScroll(grid)
@@ -94,79 +83,78 @@ func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
 	return mainStackedContainer
 }
 
+/*func CreateTopPanel()(*fyne.Container){
 
-func CreateSidePanel(app fyne.App,
-		     viewsTree *widget.Tree,
-		     notebooksTree *widget.Tree,
-		     grid *fyne.Container,
-		     noteSize fyne.Size,
-		     recentNotesLimit int)(*fyne.Container){
+	sidePanelBtn := widget.NewButton("panel")
+}*/
 
-	themeVariant := app.Settings().ThemeVariant()
-	themeColour := app.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
 
-	modSideDarkColour,_ := RGBStringToFyneColor("#232323")
-	modSideLightColour,_ := RGBStringToFyneColor("#f7e5e5")
+func CreateSidePanel()(*fyne.Container){
 
-	//lets try adding a side pane
-	/*
-	 " ": {"A"},                                                               *
-	 "A": {"B", "D"},
-	 "B": {"C"},
-	 "C": {"abc"},
-	 "D": {"E"},
-	 "E": {"F", "G"},
-	 */
-
-	viewsTree.OnSelected = func(id string) {
-		println("Selected:", id)
-		switch id{
-			case "Pinned":
-				notes,_ := scribedb.GetPinnedNotes()
-				ShowNotesInGrid(grid,notes, noteSize)
-			case "Notebooks":
-				notes,_ := scribedb.GetNotebook("General") //just for testing!!!!!!!
-				ShowNotesInGrid(grid,notes, noteSize)
-			case "Recent":
-				notes,_ := scribedb.GetRecentNotes(recentNotesLimit)
-				ShowNotesInGrid(grid,notes, noteSize)
+	pinnedBtn := widget.NewButton("P", func(){
+		if listPanel != nil{
+			listPanel.Hide()
 		}
-	}
-	viewsTree.OnUnselected = func(id string) {
-		println("Unselected:", id)
-	}
-
-	viewsTree.OpenAllBranches()
-
-	scrollTreeView := container.NewScroll(viewsTree)
-	scrollTreeView.SetMinSize(fyne.NewSize(200,200))
-
-	scrollTreeNotebooks := container.NewVScroll(notebooksTree)
-	scrollTreeNotebooks.SetMinSize(fyne.NewSize(200,500))
-
-	//notebooksTree.OpenAllBranches()
-
-	newNoteButton := widget.NewButton("New Note",func(){
-		fmt.Println("New Note button pressed!")
+		notes,_ := scribedb.GetPinnedNotes()
+		ShowNotesInGrid(grid,notes,noteSize)
 	})
 
-	spacerLabel := widget.NewLabel(" ")
-	sideVBoxContainer := container.NewVBox(newNoteButton,spacerLabel, scrollTreeView, scrollTreeNotebooks)
+	RecentBtn := widget.NewButton("R", func(){
+		if listPanel != nil{
+			listPanel.Hide()
+		}
+		notes,_ := scribedb.GetRecentNotes(recentNotesLimit)
+		ShowNotesInGrid(grid,notes,noteSize)
+	})
 
-	// set a background for the side pane depending on theme variant (light or dark)
-	sideColourRect := canvas.NewRectangle(themeColour)
-	if themeVariant == theme.VariantDark{
-		sideColourRect = canvas.NewRectangle(modSideDarkColour)
-	} else if themeVariant == theme.VariantLight{
-		sideColourRect = canvas.NewRectangle(modSideLightColour)
-	}
+	notebooksBtn := widget.NewButton("N", func(){
+		if listPanel != nil{
+			if listPanel.Visible(){
+				listPanel.Hide()
+			}else{
+				listPanel.Show()
+			}
 
-	sideStackedContainer := container.NewStack(sideColourRect,sideVBoxContainer)
+			if grid != nil{
+				grid.RemoveAll()
+			}
+		}
+	})
 
-	return sideStackedContainer
+	notebooks,_ := scribedb.GetNotebooks()
+
+	notebooksList := widget.NewList(
+		func()int {
+			return len(notebooks)
+		},
+		func() fyne.CanvasObject{
+			return widget.NewButton("------------Notebooks------------", func(){})
+
+		},
+		func(id widget.ListItemID, o fyne.CanvasObject) {
+			o.(*widget.Button).SetText(notebooks[id])
+			o.(*widget.Button).OnTapped = func(){
+				notes,_ := scribedb.GetNotebook(notebooks[id])
+				ShowNotesInGrid(grid, notes, noteSize)
+			}
+		},
+	)
+
+	btnPanel := container.NewVBox(pinnedBtn, RecentBtn, notebooksBtn)
+	listPanel = container.NewStack(notebooksList)
+	listPanel.Hide()
+
+
+	sideContainer := container.NewHBox(btnPanel,listPanel)
+
+	return sideContainer
 }
 
 func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize fyne.Size){
+	if grid == nil{
+		return
+	}
+
 	grid.RemoveAll()
 	for _, note := range notes{
 		richText := widget.NewRichTextFromMarkdown(note.Content)
