@@ -32,6 +32,11 @@ func GetRecentNotes(noteCount int) ([]NoteData, error){
 	return getNotes(query)
 }
 
+func GetNotebookCovers()([]string,error){
+	var query string = "select colour from notebookCovers"
+	return getColumn(query)
+}
+
 
 //************ Private functions ************************
 

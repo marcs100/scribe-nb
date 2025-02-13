@@ -2,6 +2,7 @@ package ui
 
 import (
 	//"image/color"
+	"fmt"
 	"scribe-nb/scribedb"
 
 	"fyne.io/fyne/v2"
@@ -11,9 +12,13 @@ import (
 	//"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	//"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
+	_ "fmt"
+	"log"
+
+	//"sort"
+
 	"fyne.io/fyne/v2/theme"
-	 _"fmt"
+	"fyne.io/fyne/v2/widget"
 )
 
 var listPanel *fyne.Container
@@ -39,14 +44,7 @@ func CreateMainWindow(app fyne.App){
 	//**************************************************************
 
 	//Main Grid container for displaying notes
-	//grid = container.New(layout.NewGridWrapLayout(noteSize))
-
 	grid = container.NewGridWrap(noteSize)
-
-	//Create the side panel
-	//side := CreateSidePanel()
-	//SIDE PANEL-------------------------------------------------
-
 
 	//Create The main panel
 	main := CreateMainPanel(app, grid)
@@ -95,7 +93,11 @@ func CreateSidePanel()(*fyne.Container){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
-		notes,_ := scribedb.GetPinnedNotes()
+		notes,err := scribedb.GetPinnedNotes()
+		if err != nil{
+			log.Print("Error getting pinned notes: ")
+			log.Panic(err)
+		}
 		ShowNotesInGrid(grid,notes,noteSize)
 	})
 
@@ -103,7 +105,11 @@ func CreateSidePanel()(*fyne.Container){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
-		notes,_ := scribedb.GetRecentNotes(recentNotesLimit)
+		notes,err := scribedb.GetRecentNotes(recentNotesLimit)
+		if err != nil{
+			log.Print("Error getting recent notes: ")
+			log.Panic(err)
+		}
 		ShowNotesInGrid(grid,notes,noteSize)
 	})
 
@@ -121,7 +127,17 @@ func CreateSidePanel()(*fyne.Container){
 		}
 	})
 
-	notebooks,_ := scribedb.GetNotebooks()
+	notebooks,err := scribedb.GetNotebooks()
+	if err != nil{
+		log.Print("Error getting Notebooks: ")
+		log.Panic(err)
+	}
+	/*nbCovers,err := scribedb.GetNotebookCovers()
+	if err != nil{
+		log.Print("Error getting notrbook covers: ")
+		log.Panic(err)
+	}
+	sort.Strings(nbCovers)*/
 
 	notebooksList := widget.NewList(
 		func()int {
@@ -160,10 +176,14 @@ func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize f
 		richText := widget.NewRichTextFromMarkdown(note.Content)
 		richText.Wrapping = fyne.TextWrapWord
 		bgColour, _ := RGBStringToFyneColor(note.BackgroundColour)
-		noteColourRect := canvas.NewRectangle(bgColour) // this is the not colour marker (used to be note background in old scribe)
-		colourLabel := canvas.NewText("", bgColour) // this is only used to size the note colour rectangle
-		colourLabel.TextSize = 13
-		contStacked := container.NewStack(colourLabel,noteColourRect) //stacked sowe can use a coloured rectangle as the background to the label
+		noteColourRect := canvas.NewRectangle(bgColour) // this is the note colour marker (used to be note background in old scribe)
+		//colourLabel := canvas.NewText("              ", bgColour) // this is only used to size the note colour rectangle
+		//colourLabel.TextSize = 13
+		openButton := widget.NewButton(" open ", func(){
+			fmt.Println("Open note !!!!!!!!!!!!!!!!!!")
+		})
+		hbox := container.NewHBox(openButton)
+		contStacked := container.NewStack(noteColourRect, /*colourLabel,*/ hbox) //stacked sowe can use a coloured rectangle as the background to the label
 		cont := container.NewVBox(contStacked, richText)
 		cont.Resize(noteSize)
 		srcont := container.NewHScroll(cont)
