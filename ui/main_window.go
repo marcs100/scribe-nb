@@ -2,7 +2,7 @@ package ui
 
 import (
 	//"image/color"
-	"fmt"
+	//"fmt"
 	"scribe-nb/scribedb"
 
 	"fyne.io/fyne/v2"
@@ -177,13 +177,13 @@ func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize f
 		richText.Wrapping = fyne.TextWrapWord
 		bgColour, _ := RGBStringToFyneColor(note.BackgroundColour)
 		noteColourRect := canvas.NewRectangle(bgColour) // this is the note colour marker (used to be note background in old scribe)
-		//colourLabel := canvas.NewText("              ", bgColour) // this is only used to size the note colour rectangle
-		//colourLabel.TextSize = 13
-		openButton := widget.NewButton(" open ", func(){
+		colourLabel := canvas.NewText("              ", bgColour) // this is only used to size the note colour rectangle
+		colourLabel.TextSize = 13
+		/*openButton := widget.NewButton(" open ", func(){
 			fmt.Println("Open note !!!!!!!!!!!!!!!!!!")
 		})
-		hbox := container.NewHBox(openButton)
-		contStacked := container.NewStack(noteColourRect, /*colourLabel,*/ hbox) //stacked sowe can use a coloured rectangle as the background to the label
+		hbox := container.NewHBox(openButton) */
+		contStacked := container.NewStack(noteColourRect, colourLabel) //stacked sowe can use a coloured rectangle as the background to the label
 		cont := container.NewVBox(contStacked, richText)
 		cont.Resize(noteSize)
 		srcont := container.NewHScroll(cont)
