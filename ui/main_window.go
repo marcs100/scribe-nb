@@ -2,7 +2,8 @@ package ui
 
 import (
 	//"image/color"
-	//"fmt"
+	//"strconv"
+	"fmt"
 	"scribe-nb/scribedb"
 
 	"fyne.io/fyne/v2"
@@ -23,7 +24,10 @@ import (
 
 var listPanel *fyne.Container
 var grid *fyne.Container
-var noteSize fyne.Size = fyne.NewSize(500,400) //default note size, may be overidden by user prefs
+var noteWidth float32 = 500
+var noteHeight float32 = 350
+var noteSize fyne.Size = fyne.NewSize(noteWidth,noteHeight) //default note size, may be overidden by user prefs
+//var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
 var recentNotesLimit = 6 //default,  may be overidden by user prefs
 
 
@@ -38,7 +42,7 @@ func CreateMainWindow(app fyne.App){
 	mainWindow := app.NewWindow("Scribe-NB")
 
 	// Options that wil be part of config file ************************
-	noteSize = fyne.NewSize(500,400) //this should depend on resolution of current display
+	//noteSize = fyne.NewSize(500,400) //this should depend on resolution of current display
 	recentNotesLimit = 6
 	//initialView := "Recent"
 	//**************************************************************
@@ -173,21 +177,16 @@ func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize f
 
 	grid.RemoveAll()
 	for _, note := range notes{
-		richText := widget.NewRichTextFromMarkdown(note.Content)
-		richText.Wrapping = fyne.TextWrapWord
-		bgColour, _ := RGBStringToFyneColor(note.BackgroundColour)
-		noteColourRect := canvas.NewRectangle(bgColour) // this is the note colour marker (used to be note background in old scribe)
-		colourLabel := canvas.NewText("              ", bgColour) // this is only used to size the note colour rectangle
-		colourLabel.TextSize = 13
-		/*openButton := widget.NewButton(" open ", func(){
-			fmt.Println("Open note !!!!!!!!!!!!!!!!!!")
+		richText := newScribeNoteText(note.Content, func(){
+			fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
 		})
-		hbox := container.NewHBox(openButton) */
-		contStacked := container.NewStack(noteColourRect, colourLabel) //stacked sowe can use a coloured rectangle as the background to the label
-		cont := container.NewVBox(contStacked, richText)
-		cont.Resize(noteSize)
-		srcont := container.NewHScroll(cont)
-		srcont.Resize(noteSize)
-		grid.Add(srcont)
+		richText.Wrapping = fyne.TextWrapWord
+		//bgColour, _ := RGBStringToFyneColor(note.BackgroundColour)
+		//noteColourRect := canvas.NewRectangle(bgColour) // this is the note colour marker (used to be note background in old scribe)
+		//noteColourRect.Resize(noteBorderSize)
+
+		//textCont := container.NewStack(richText)
+		//textCont.Resize(noteSize)
+		grid.Add(richText)
 	}
 }
