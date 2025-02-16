@@ -9,6 +9,9 @@ import (
 
 //*********** Public functions ************************
 
+func GetNote(uint id)NoteData{
+	var query string = fmt.Sprintf("select * from notes where id = %d", id)
+}
 
 func GetPinnedNotes() ([]NoteData, error){
 	var query string = "select * from notes where pinned = 1 order by modified desc"
@@ -61,6 +64,10 @@ func getColumn(query string)([]string, error){
 	}
 
 	return fields, err
+}
+
+func getNote(query string)(NoteData, error){
+
 }
 
 
