@@ -3,7 +3,6 @@ package ui
 import (
 	//"image/color"
 	//"strconv"
-	"fmt"
 	"scribe-nb/scribedb"
 
 	"fyne.io/fyne/v2"
@@ -53,7 +52,7 @@ func CreateMainWindow(app fyne.App){
 	//Create The main panel
 	main := CreateMainPanel(app, grid)
 
-	side := CreateSidePanel()
+	side := CreateSidePanel(app)
 
 	//layout the main window
 	appContainer := container.NewBorder(nil, nil, side, nil, main)
@@ -91,7 +90,7 @@ func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
 }*/
 
 
-func CreateSidePanel()(*fyne.Container){
+func CreateSidePanel(app fyne.App)(*fyne.Container){
 
 	pinnedBtn := widget.NewButton("P", func(){
 		if listPanel != nil{
@@ -102,7 +101,7 @@ func CreateSidePanel()(*fyne.Container){
 			log.Print("Error getting pinned notes: ")
 			log.Panic(err)
 		}
-		ShowNotesInGrid(grid,notes,noteSize)
+		ShowNotesInGrid(app, grid,notes,noteSize)
 	})
 
 	RecentBtn := widget.NewButton("R", func(){
@@ -114,7 +113,7 @@ func CreateSidePanel()(*fyne.Container){
 			log.Print("Error getting recent notes: ")
 			log.Panic(err)
 		}
-		ShowNotesInGrid(grid,notes,noteSize)
+		ShowNotesInGrid(app, grid,notes,noteSize)
 	})
 
 	notebooksBtn := widget.NewButton("N", func(){
@@ -155,7 +154,7 @@ func CreateSidePanel()(*fyne.Container){
 			o.(*widget.Button).SetText(notebooks[id])
 			o.(*widget.Button).OnTapped = func(){
 				notes,_ := scribedb.GetNotebook(notebooks[id])
-				ShowNotesInGrid(grid, notes, noteSize)
+				ShowNotesInGrid(app, grid, notes, noteSize)
 			}
 		},
 	)
@@ -170,7 +169,7 @@ func CreateSidePanel()(*fyne.Container){
 	return sideContainer
 }
 
-func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize fyne.Size){
+func ShowNotesInGrid(app fyne.App, grid *fyne.Container, notes []scribedb.NoteData, noteSize fyne.Size){
 	if grid == nil{
 		return
 	}
@@ -178,15 +177,10 @@ func ShowNotesInGrid(grid *fyne.Container, notes []scribedb.NoteData, noteSize f
 	grid.RemoveAll()
 	for _, note := range notes{
 		richText := newScribeNoteText(note.Content, func(){
-			fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
+			//fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
+			OpenNoteWindow(app,note.Id)
 		})
 		richText.Wrapping = fyne.TextWrapWord
-		//bgColour, _ := RGBStringToFyneColor(note.BackgroundColour)
-		//noteColourRect := canvas.NewRectangle(bgColour) // this is the note colour marker (used to be note background in old scribe)
-		//noteColourRect.Resize(noteBorderSize)
-
-		//textCont := container.NewStack(richText)
-		//textCont.Resize(noteSize)
 		grid.Add(richText)
 	}
 }

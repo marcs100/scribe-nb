@@ -9,8 +9,10 @@ import (
 
 //*********** Public functions ************************
 
-func GetNote(uint id)NoteData{
+func GetNote(id uint)(NoteData, error){
 	var query string = fmt.Sprintf("select * from notes where id = %d", id)
+	notes,err := getNotes(query)
+	return notes[0], err
 }
 
 func GetPinnedNotes() ([]NoteData, error){
@@ -65,11 +67,6 @@ func getColumn(query string)([]string, error){
 
 	return fields, err
 }
-
-func getNote(query string)(NoteData, error){
-
-}
-
 
 
 func getNotes(query string)([]NoteData, error){
