@@ -15,8 +15,6 @@ import (
 	_ "fmt"
 	"log"
 
-	//"sort"
-
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
