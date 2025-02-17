@@ -3,6 +3,7 @@ package scribedb
 import(
 	"errors"
 	"fmt"
+	"time"
 	_ "github.com/mattn/go-sqlite3"
 
 
@@ -14,8 +15,7 @@ func SaveNote(id uint, notebook string, content string, pinned uint, colour stri
 		return 0, errors.New("SaveNote: database not connected")
 	}
 
-	var modified = "2025-02-17 18:24:09"
-
+	var modified = time.Now().String()[0:19]
 	fmt.Printf("fields: %d, %s, %d, %s, %s\n", id, notebook, pinned, modified, colour)
 
 	res, err := db.Exec("update notes set notebook = ?, content = ?, pinned = ?,  modified = ?, BGColour = ? where id = ?",notebook, content, pinned, modified, colour, id)
@@ -30,7 +30,7 @@ func InsertNote(notebook string, content string, pinned uint, colour string)(int
 	}
 
 	//calculate date created and modified
-	var created string = "2025-02-17 17:53:03"
+	var created = time.Now().String()[0:19]
 	var modified = created
 
 	res, err := db.Exec("INSERT INTO notes VALUES(NULL,?,?,?,?,?,?);",notebook, content, pinned, created, modified, colour)

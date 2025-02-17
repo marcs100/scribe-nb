@@ -45,12 +45,34 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 
 	noteWindow := app.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", retreievdNote.Notebook, retreievdNote.Id))
 	noteWindow.Resize(fyne.NewSize(850, 900))
+
 	entry := widget.NewEntry()
 	entry.Text = noteInfo.Content
 
-	cont := container.NewStack(entry)
+	markdown := widget.NewRichTextFromMarkdown(noteInfo.Content)
+	markdown.Hide()
 
-	noteWindow.SetContent(cont)
+	toolbarWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
+		switch value{
+			case "Edit":
+				markdown.Hide()
+				noteWindow.Canvas().Focus(entry) //this seems to make no difference!!!
+				entry.Show()
+			case "View":
+				entry.Hide()
+				markdown.ParseMarkdown(entry.Text)
+				markdown.Show()
+		}
+	})
+
+	toolbarWidget.SetSelected("View")
+	toolbarWidget.Horizontal = true;
+
+	content := container.NewStack(entry, markdown)
+	toolbar := container.NewHBox(toolbarWidget)
+	win := container.NewBorder(toolbar, nil,nil,nil,content)
+
+	noteWindow.SetContent(win)
 	noteWindow.Canvas().Focus(entry)
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
