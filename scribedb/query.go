@@ -71,7 +71,7 @@ func getColumn(query string)([]string, error){
 
 func getNotes(query string)([]NoteData, error){
 	if !connected{
-		return nil, errors.New("GetPinnedNotes: database not connected")
+		return nil, errors.New("Get Notes: database not connected")
 	}
 
 	rows, err := db.Query(query)

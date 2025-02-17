@@ -27,6 +27,8 @@ var noteSize fyne.Size = fyne.NewSize(noteWidth,noteHeight) //default note size,
 //var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
 var recentNotesLimit = 6 //default,  may be overidden by user prefs
 
+var openNotes []uint //maintain a list of notes that are currently open
+
 
 func StartUI(){
 
@@ -81,12 +83,6 @@ func CreateMainPanel(app fyne.App, grid *fyne.Container)(*fyne.Container){
 
 	return mainStackedContainer
 }
-
-/*func CreateTopPanel()(*fyne.Container){
-
-	sidePanelBtn := widget.NewButton("panel")
-}*/
-
 
 func CreateSidePanel(app fyne.App)(*fyne.Container){
 

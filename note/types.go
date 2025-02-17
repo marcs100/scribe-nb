@@ -1,9 +1,19 @@
 package note
 
-import()
+import (
 
-type status struct{
-	modified bool
-	hash string
+)
+
+type NoteInfo struct{
+	Id uint
+	NewNote bool
+	Notebook string
+	Pinned bool
+	Colour string
+	DateCreated string
+	DateModified string
+	Content string
+	Hash string
 }
+
 
