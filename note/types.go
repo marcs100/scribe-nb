@@ -14,6 +14,7 @@ type NoteInfo struct{
 	DateModified string
 	Content string
 	Hash string
+	Deleted bool
 }
 
 

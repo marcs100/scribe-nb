@@ -29,6 +29,7 @@ func OpenNoteWindow(noteId uint) {
 		DateModified: retreievdNote.Modified,
 		Colour: retreievdNote.BackgroundColour,
 		Content: retreievdNote.Content,
+		Deleted: false,
 	}
 
 
@@ -58,7 +59,7 @@ func OpenNoteWindow(noteId uint) {
 	markdown.Wrapping = fyne.TextWrapWord
 	markdown.Hide()
 
-	toolbarWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
+	modeWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
 		switch value{
 			case "Edit":
 				markdown.Hide()
@@ -71,14 +72,25 @@ func OpenNoteWindow(noteId uint) {
 		}
 	})
 
-	toolbarWidget.SetSelected("View")
-	toolbarWidget.Horizontal = true;
+	modeWidget.SetSelected("View")
+	modeWidget.Horizontal = true;
+
+	deleteBtn := widget.NewButton("Del", func(){
+		res, err := scribedb.DeleteNote(noteInfo.Id)
+		if res == 0 || err != nil{
+			log.Println("Error deleing notes")
+		}else{
+			noteInfo.Deleted = true
+			noteWindow.Close()
+		}
+	})
+
+	spacerLabel := widget.NewLabel("      ")
 
 	scrolledMarkdown := container.NewScroll(markdown)
-
 	background := canvas.NewRectangle(themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
-	toolbar := container.NewHBox(toolbarWidget)
+	toolbar := container.NewHBox(modeWidget,spacerLabel, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)
@@ -96,13 +108,12 @@ func OpenNoteWindow(noteId uint) {
 			if res == 0{
 				log.Println("No note was saved (affected rows = 0)")
 			}else{
-				log.Println("....Note saved successfully....")
+				log.Println("....Note updates successfully....")
 				go UpdateView()
 				//err := UpdateView() //update view in main window
 				//if err != nil{
 				//		log.Println("Error updating view")
 				//}
-
 			}
 		}
 		if index := slices.Index(openNotes,noteInfo.Id); index != -1{

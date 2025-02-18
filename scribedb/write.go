@@ -2,12 +2,30 @@ package scribedb
 
 import(
 	"errors"
-	"fmt"
+	//"fmt"
 	"time"
 	_ "github.com/mattn/go-sqlite3"
 
 
 )
+
+func PinNote(id uint)(int64, error){
+	res, err := db.Exec("update notes set pinned = 1 where id = ?",id)
+	rows,_ := res.RowsAffected()
+	return rows, err
+}
+
+func UnpinNote(id uint)(int64, error){
+	res, err := db.Exec("update notes set pinned = 0 where id = ?",id)
+	rows,_ := res.RowsAffected()
+	return rows, err
+}
+
+func DeleteNote(id uint)(int64, error){
+	res, err := db.Exec("delete from notes where id = ?",id)
+	rows,_ := res.RowsAffected()
+	return rows, err
+}
 
 
 func SaveNote(id uint, notebook string, content string, pinned uint, colour string)(int64, error){
@@ -16,7 +34,7 @@ func SaveNote(id uint, notebook string, content string, pinned uint, colour stri
 	}
 
 	var modified = time.Now().String()[0:19]
-	fmt.Printf("fields: %d, %s, %d, %s, %s\n", id, notebook, pinned, modified, colour)
+	//fmt.Printf("fields: %d, %s, %d, %s, %s\n", id, notebook, pinned, modified, colour)
 
 	res, err := db.Exec("update notes set notebook = ?, content = ?, pinned = ?,  modified = ?, BGColour = ? where id = ?",notebook, content, pinned, modified, colour, id)
 	rows,_ := res.RowsAffected()

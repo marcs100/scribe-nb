@@ -18,6 +18,10 @@ func calcHash(content string) string{
 }
 
 func CheckChanges(orig_db *scribedb.NoteData, currentNote *NoteInfo)(bool){
+	if currentNote.Deleted{
+		return true
+	}
+
 	if orig_db.Pinned > 0 &&  !currentNote.Pinned{
 		return true
 	}else if orig_db.Pinned == 0 && currentNote.Pinned{
@@ -45,6 +49,10 @@ func SaveNote(note *NoteInfo)(int64, error){
 	if note.Pinned {pinned = 1}
 	var res int64
 	var err error
+	if note.Deleted{
+		return 1,err //dont save note that has been deleted from the database
+	}
+
 	if note.NewNote{
 		res, err = scribedb.InsertNote(note.Notebook, note.Content, pinned, note.Colour)
 	}else{
