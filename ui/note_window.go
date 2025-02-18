@@ -3,15 +3,18 @@ package ui
 import (
 	"fmt"
 	"log"
-	"scribe-nb/scribedb"
 	"scribe-nb/note"
+	"scribe-nb/scribedb"
+	"slices"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	//"github.com/fyne-io/terminal"
 )
 
-func OpenNoteWindow(app fyne.App, noteId uint) {
+func OpenNoteWindow(noteId uint) {
 	retreievdNote, err := scribedb.GetNote(noteId)
 
 	if err != nil{
@@ -28,6 +31,7 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 		Content: retreievdNote.Content,
 	}
 
+
 	if noteInfo.Id != 0{
 		noteInfo.NewNote = false
 	}else{
@@ -43,13 +47,15 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 	//calculate initial note content hash
 	note.UpdateHash(&noteInfo)
 
-	noteWindow := app.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", retreievdNote.Notebook, retreievdNote.Id))
-	noteWindow.Resize(fyne.NewSize(850, 900))
+	noteWindow := mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", retreievdNote.Notebook, retreievdNote.Id))
+	noteWindow.Resize(fyne.NewSize(900, 750))
 
-	entry := widget.NewEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.Text = noteInfo.Content
+	entry.Wrapping = fyne.TextWrapWord
 
 	markdown := widget.NewRichTextFromMarkdown(noteInfo.Content)
+	markdown.Wrapping = fyne.TextWrapWord
 	markdown.Hide()
 
 	toolbarWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
@@ -68,7 +74,10 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 	toolbarWidget.SetSelected("View")
 	toolbarWidget.Horizontal = true;
 
-	content := container.NewStack(entry, markdown)
+	scrolledMarkdown := container.NewScroll(markdown)
+
+	background := canvas.NewRectangle(themeBgColour)
+	content := container.NewStack(background, entry, scrolledMarkdown)
 	toolbar := container.NewHBox(toolbarWidget)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
@@ -76,7 +85,6 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 	noteWindow.Canvas().Focus(entry)
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
-		fmt.Println("You will want to remove the id from the openNotes list here!!!!!!!")
 		noteInfo.Content = entry.Text
 		if note.CheckChanges(&retreievdNote,&noteInfo){
 			res, err := note.SaveNote(&noteInfo)
@@ -89,7 +97,16 @@ func OpenNoteWindow(app fyne.App, noteId uint) {
 				log.Println("No note was saved (affected rows = 0)")
 			}else{
 				log.Println("....Note saved successfully....")
+				go UpdateView()
+				//err := UpdateView() //update view in main window
+				//if err != nil{
+				//		log.Println("Error updating view")
+				//}
+
 			}
+		}
+		if index := slices.Index(openNotes,noteInfo.Id); index != -1{
+			openNotes = slices.Delete(openNotes,index,index+1)
 		}
 
 	})

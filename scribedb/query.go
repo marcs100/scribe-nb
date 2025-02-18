@@ -48,7 +48,7 @@ func GetNotebookCovers()([]string,error){
 //use to get a single column as list of strungs
 func getColumn(query string)([]string, error){
 	if !connected{
-		return nil, errors.New("GetPinnedNotes: database not connected")
+		return nil, errors.New("GetColumn: database not connected")
 	}
 
 	rows, err := db.Query(query)
