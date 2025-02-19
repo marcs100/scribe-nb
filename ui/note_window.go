@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -76,13 +77,17 @@ func OpenNoteWindow(noteId uint) {
 	modeWidget.Horizontal = true;
 
 	deleteBtn := widget.NewButton("Del", func(){
-		res, err := scribedb.DeleteNote(noteInfo.Id)
-		if res == 0 || err != nil{
-			log.Println("Error deleing notes")
-		}else{
-			noteInfo.Deleted = true
-			noteWindow.Close()
-		}
+		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
+			if confirm{
+				res, err := scribedb.DeleteNote(noteInfo.Id)
+				if res == 0 || err != nil{
+					log.Println("Error deleing notes")
+				}else{
+					noteInfo.Deleted = true
+					noteWindow.Close()
+				}
+			}
+		}, noteWindow)
 	})
 
 	spacerLabel := widget.NewLabel("      ")
