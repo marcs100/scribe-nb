@@ -5,9 +5,11 @@ import (
 	//"strconv"
 	"image/color"
 	"scribe-nb/scribedb"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
+	//"fyne.io/fyne/v2/layout"
 
 	//"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -93,8 +95,6 @@ func CreateMainWindow(){
 func CreateMainPanel()(*fyne.Container){
 
 	mainContainer := container.NewScroll(grid)
-	//mainBackground := canvas.NewRectangle(themeBgColour)
-	//mainStackedContainer := container.NewStack(mainBackground, mainContainer)
 	mainStackedContainer := container.NewStack(mainContainer)
 	return mainStackedContainer
 }
@@ -202,9 +202,19 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 			}
 		})
 		richText.Wrapping = fyne.TextWrapWord
-		background := canvas.NewRectangle(themeBgColour)
-		gridContainer := container.NewStack(background, richText)
-		grid.Add(gridContainer)
+		themeBackground := canvas.NewRectangle(themeBgColour)
+		noteColour,_ := RGBStringToFyneColor(note.BackgroundColour)
+		noteBackground := canvas.NewRectangle(noteColour)
+		if note.BackgroundColour == "#e7edef" || note.BackgroundColour == "#FFFFFF"{
+			noteBackground = canvas.NewRectangle(themeBgColour) // colour not set or using the old scribe default note colour
+		}
+
+		colourStack := container.NewStack(noteBackground)
+		textPadded := container.NewPadded(themeBackground, richText)
+		noteStack:= container.NewStack(colourStack, textPadded)
+
+		//borderLayout := container.NewBorder(noteBackground,noteBackground,noteBackground, noteBackground,textStack)
+		grid.Add(noteStack)
 	}
 	grid.Refresh()
 }

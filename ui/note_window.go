@@ -60,22 +60,6 @@ func OpenNoteWindow(noteId uint) {
 	markdown.Wrapping = fyne.TextWrapWord
 	markdown.Hide()
 
-	modeWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
-		switch value{
-			case "Edit":
-				markdown.Hide()
-				noteWindow.Canvas().Focus(entry) //this seems to make no difference!!!
-				entry.Show()
-			case "View":
-				entry.Hide()
-				markdown.ParseMarkdown(entry.Text)
-				markdown.Show()
-		}
-	})
-
-	modeWidget.SetSelected("View")
-	modeWidget.Horizontal = true;
-
 	deleteBtn := widget.NewButton("Del", func(){
 		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
 			if confirm{
@@ -89,6 +73,25 @@ func OpenNoteWindow(noteId uint) {
 			}
 		}, noteWindow)
 	})
+	deleteBtn.Hide()
+
+	modeWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
+		switch value{
+			case "Edit":
+				markdown.Hide()
+				deleteBtn.Show()
+				noteWindow.Canvas().Focus(entry) //this seems to make no difference!!!
+				entry.Show()
+			case "View":
+				entry.Hide()
+				deleteBtn.Hide()
+				markdown.ParseMarkdown(entry.Text)
+				markdown.Show()
+		}
+	})
+
+	modeWidget.SetSelected("View")
+	modeWidget.Horizontal = true;
 
 	spacerLabel := widget.NewLabel("      ")
 
