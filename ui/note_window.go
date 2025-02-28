@@ -16,6 +16,8 @@ import (
 )
 
 func OpenNoteWindow(noteId uint) {
+	var PinBtn *widget.Button
+
 	retreievdNote, err := scribedb.GetNote(noteId)
 
 	if err != nil{
@@ -60,6 +62,37 @@ func OpenNoteWindow(noteId uint) {
 	markdown.Wrapping = fyne.TextWrapWord
 	markdown.Hide()
 
+	var btnLabel = "Pin"
+	if noteInfo.Pinned {
+		btnLabel = "Unpin"
+	}
+
+	fmt.Println("label is "+ btnLabel)
+
+	PinBtn = widget.NewButton(btnLabel, func(){
+		if noteInfo.Pinned{
+			res,err := scribedb.UnpinNote(noteInfo.Id)
+			if err == nil && res==1{
+				noteInfo.Pinned = false
+				if PinBtn != nil{
+					PinBtn.SetText("Pin")
+					PinBtn.Refresh()
+				}
+			}
+		}else{
+			res,err := scribedb.PinNote(noteInfo.Id)
+			if err == nil && res==1{
+				noteInfo.Pinned = true
+				if PinBtn != nil{
+					PinBtn.SetText("UnPin")
+					PinBtn.Refresh()
+				}
+			}
+		}
+
+	})
+
+
 	deleteBtn := widget.NewButton("Del", func(){
 		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
 			if confirm{
@@ -98,7 +131,7 @@ func OpenNoteWindow(noteId uint) {
 	scrolledMarkdown := container.NewScroll(markdown)
 	background := canvas.NewRectangle(themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
-	toolbar := container.NewHBox(modeWidget,spacerLabel, deleteBtn)
+	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)
@@ -106,7 +139,9 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
 		noteInfo.Content = entry.Text
-		if note.CheckChanges(&retreievdNote,&noteInfo){
+		contentChanged, paramsChanged := note.CheckChanges(&retreievdNote,&noteInfo)
+		//if contentChanged{
+		if contentChanged || paramsChanged{
 			res, err := note.SaveNote(&noteInfo)
 			if err != nil{
 				log.Println("Error saving note")
@@ -118,12 +153,23 @@ func OpenNoteWindow(noteId uint) {
 			}else{
 				log.Println("....Note updates successfully....")
 				go UpdateView()
-				//err := UpdateView() //update view in main window
-				//if err != nil{
-				//		log.Println("Error updating view")
-				//}
 			}
 		}
+		/*} else if paramsChanged{
+			res, err := note.SaveNoteNoTimeStamp(&noteInfo)
+			if err != nil{
+				log.Println("Error saving note")
+				log.Panic()
+			}
+
+			if res == 0{
+				log.Println("No note was saved (affected rows = 0)")
+			}else{
+				log.Println("....Note updates successfully....")
+				go UpdateView()
+			}
+		} */
+
 		if index := slices.Index(openNotes,noteInfo.Id); index != -1{
 			openNotes = slices.Delete(openNotes,index,index+1)
 		}

@@ -42,6 +42,17 @@ func SaveNote(id uint, notebook string, content string, pinned uint, colour stri
 	return rows, err
 }
 
+func SaveNoteNoTimeStamp(id uint, notebook string, content string, pinned uint, colour string)(int64, error){
+	if !connected{
+		return 0, errors.New("SaveNote: database not connected")
+	}
+
+	res, err := db.Exec("update notes set notebook = ?, content = ?, pinned = ?, BGColour = ? where id = ?",notebook, content, pinned, colour, id)
+	rows,_ := res.RowsAffected()
+
+	return rows, err
+}
+
 func InsertNote(notebook string, content string, pinned uint, colour string)(int64,error){
 	if !connected{
 		return 0,errors.New("InsertNote: database not connected")
