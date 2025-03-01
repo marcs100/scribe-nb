@@ -5,7 +5,7 @@ import(
 	"encoding/hex"
 )
 
-func SringToRGBValues(colour string)(uint8, uint8, uint8, error){
+func StringToRGBValues(colour string)(uint8, uint8, uint8, error){
 	var r uint8
 	var g uint8
 	var b uint8
