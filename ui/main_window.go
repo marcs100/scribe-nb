@@ -29,6 +29,7 @@ var noteHeight float32 = 350
 var noteSize fyne.Size = fyne.NewSize(noteWidth,noteHeight) //default note size, may be overidden by user prefs
 var grid *fyne.Container
 var mainApp fyne.App
+var viewLabel *widget.Label
 //var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
 var recentNotesLimit = 6 //default,  may be overidden by user prefs
 
@@ -36,10 +37,11 @@ var openNotes []uint //maintain a list of notes that are currently open
 
 const VIEW_PINNED string = "pinned"
 const VIEW_RECENT string = "recent"
-const VIEW_NOTEBOOK string = "notebook"
+const VIEW_NOTEBOOK string = "notebooks"
 const VIEW_TAGS string = "tag"
 var currentView string = ""
 var currentNotebook string = ""
+var notes []scribedb.NoteData
 
 var themeBgColour color.Color
 
@@ -76,10 +78,12 @@ func CreateMainWindow(){
 	//Create The main panel
 	main := CreateMainPanel()
 
+	top := CreateTopPanel()
+
 	side := CreateSidePanel()
 
 	//layout the main window
-	appContainer := container.NewBorder(nil, nil, side, nil, main)
+	appContainer := container.NewBorder(top, nil, side, nil, main)
 
 	mainWindow.SetContent(appContainer)
 	mainWindow.Resize(fyne.NewSize(2000,1200))
@@ -99,35 +103,48 @@ func CreateMainPanel()(*fyne.Container){
 	return mainStackedContainer
 }
 
+func CreateTopPanel()(*fyne.Container){
+	viewLabel = widget.NewLabel("Pinned Notes")
+	viewLabelFixed := widget.NewLabel("Viewing: ")
+	spacer := widget.NewLabel("    ")
+	topPanel := container.NewHBox(spacer, viewLabelFixed, viewLabel)
+	return topPanel
+}
+
 func CreateSidePanel()(*fyne.Container){
 	var listPanel *fyne.Container
 	pinnedBtn := widget.NewButton("P", func(){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
-		notes,err := scribedb.GetPinnedNotes()
+		var err error
+		notes,err = scribedb.GetPinnedNotes()
 		if err != nil{
 			log.Print("Error getting pinned notes: ")
 			log.Panic(err)
 		}
 		currentView = VIEW_PINNED
-		ShowNotesInGrid(notes,noteSize)
+		//ShowNotesInGrid(notes,noteSize)
+		UpdateView()
 	})
 
 	RecentBtn := widget.NewButton("R", func(){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
-		notes,err := scribedb.GetRecentNotes(recentNotesLimit)
+		var err error
+		notes,err = scribedb.GetRecentNotes(recentNotesLimit)
 		if err != nil{
 			log.Print("Error getting recent notes: ")
 			log.Panic(err)
 		}
 		currentView = VIEW_RECENT
-		ShowNotesInGrid(notes,noteSize)
+		//ShowNotesInGrid(notes,noteSize)
+		UpdateView()
 	})
 
 	notebooksBtn := widget.NewButton("N", func(){
+		viewLabel.SetText("Notebooks")
 		if listPanel != nil{
 			if listPanel.Visible(){
 				listPanel.Hide()
@@ -165,10 +182,11 @@ func CreateSidePanel()(*fyne.Container){
 		func(id widget.ListItemID, o fyne.CanvasObject) {
 			o.(*widget.Button).SetText(notebooks[id])
 			o.(*widget.Button).OnTapped = func(){
-				notes,_ := scribedb.GetNotebook(notebooks[id])
+				notes,_ = scribedb.GetNotebook(notebooks[id])
 				currentView = VIEW_NOTEBOOK
 				currentNotebook = notebooks[id]
-				ShowNotesInGrid(notes, noteSize)
+				//ShowNotesInGrid(notes, noteSize)
+				UpdateView()
 			}
 		},
 	)
@@ -222,15 +240,18 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 
 
 func UpdateView()error{
-	var notes []scribedb.NoteData
+	//var notes []scribedb.NoteData
 	var err error
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
 	switch currentView{
 		case VIEW_PINNED:
+			viewLabel.SetText("Pinned Notes")
 			notes, err = scribedb.GetPinnedNotes()
 		case VIEW_RECENT:
+			viewLabel.SetText(("Recent Notes"))
 			notes, err = scribedb.GetRecentNotes(recentNotesLimit)
 		case VIEW_NOTEBOOK:
+			viewLabel.SetText("Notebook - " + currentNotebook)
 			notes, err = scribedb.GetNotebook(currentNotebook)
 		default:
 			err = errors.New("undefined view")
