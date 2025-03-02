@@ -5,6 +5,7 @@ import (
 	//"strconv"
 	"image/color"
 	"scribe-nb/scribedb"
+	"scribe-nb/note"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -39,9 +40,13 @@ const VIEW_PINNED string = "pinned"
 const VIEW_RECENT string = "recent"
 const VIEW_NOTEBOOK string = "notebooks"
 const VIEW_TAGS string = "tag"
+const LAYOUT_GRID = "grid"
+const LAYOUT_PAGE = "page"
 var currentView string = ""
 var currentNotebook string = ""
+var currentLayout = ""
 var notes []scribedb.NoteData
+var pageView PageView
 
 var themeBgColour color.Color
 
@@ -70,7 +75,11 @@ func CreateMainWindow(){
 	//noteSize = fyne.NewSize(500,400) //this should depend on resolution of current display
 	recentNotesLimit = 6
 	initialView := VIEW_PINNED
+	initialLayout := LAYOUT_GRID
 	//**************************************************************
+
+	pageView.CurrentPage = 0
+	pageView.NumberOfPages = 0
 
 	//Main Grid container for displaying notes
 	grid = container.NewGridWrap(noteSize)
@@ -88,8 +97,10 @@ func CreateMainWindow(){
 	mainWindow.SetContent(appContainer)
 	mainWindow.Resize(fyne.NewSize(2000,1200))
 
-	//set defaukr view
+	//set default view and layout`
 	currentView = initialView
+	currentLayout = initialLayout
+
 	UpdateView()
 
 	mainWindow.ShowAndRun()
@@ -107,7 +118,23 @@ func CreateTopPanel()(*fyne.Container){
 	viewLabel = widget.NewLabel("Pinned Notes")
 	viewLabelFixed := widget.NewLabel("Viewing: ")
 	spacer := widget.NewLabel("    ")
-	topPanel := container.NewHBox(spacer, viewLabelFixed, viewLabel)
+
+	toolbar := widget.NewToolbar(
+		widget.NewToolbarAction(theme.GridIcon(), func(){
+			if currentLayout != LAYOUT_GRID{
+				currentLayout = LAYOUT_GRID
+				UpdateView()
+			}
+		}),
+		widget.NewToolbarAction(theme.DocumentIcon(), func(){
+			if currentLayout != LAYOUT_PAGE{
+				currentLayout = LAYOUT_PAGE
+				UpdateView()
+			}
+		}),
+	)
+
+	topPanel := container.NewHBox(spacer, viewLabelFixed, viewLabel, toolbar)
 	return topPanel
 }
 
@@ -237,6 +264,53 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 	grid.Refresh()
 }
 
+func ShowNotesAsPages(notes []scribedb.NoteData){
+	//if grid != nil{
+	//	grid.Hide()
+	//}
+
+	pageView.NumberOfPages = len(notes)
+	if pageView.CurrentPage ==0{
+		pageView.CurrentPage = 1
+	}
+
+	retreievdNote, err := scribedb.GetNote(notes[pageView.CurrentPage-1].Id)
+
+	if err != nil{
+		log.Println("error getting note")
+		log.Panic(err)
+	}
+
+	noteInfo := note.NoteInfo{
+		Id: retreievdNote.Id,
+		Notebook: retreievdNote.Notebook,
+		DateCreated: retreievdNote.Created,
+		DateModified: retreievdNote.Modified,
+		Colour: retreievdNote.BackgroundColour,
+		Content: retreievdNote.Content,
+		Deleted: false,
+	}
+
+
+	if noteInfo.Id != 0{
+		noteInfo.NewNote = false
+	}else{
+		noteInfo.NewNote = true
+	}
+
+	if retreievdNote.Pinned > 0{
+		noteInfo.Pinned = true
+	} else {
+		noteInfo.Pinned = false
+	}
+
+	//calculate initial note content hash
+	//note.UpdateHash(&noteInfo)
+
+	markdown := widget.NewRichTextFromMarkdown(noteInfo.Content)
+	markdown.Wrapping = fyne.TextWrapWord
+	grid.Add(markdown)
+}
 
 
 func UpdateView()error{
@@ -257,8 +331,15 @@ func UpdateView()error{
 			err = errors.New("undefined view")
 	}
 
-	if err == nil{
-		ShowNotesInGrid(notes, noteSize)
+	if err != nil{
+		return err
+	}
+
+	switch currentLayout{
+		case LAYOUT_GRID:
+			ShowNotesInGrid(notes, noteSize)
+		case LAYOUT_PAGE:
+			ShowNotesAsPages(notes)
 	}
 
 	return err
