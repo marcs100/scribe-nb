@@ -29,8 +29,13 @@ var noteWidth float32 = 500
 var noteHeight float32 = 350
 var noteSize fyne.Size = fyne.NewSize(noteWidth,noteHeight) //default note size, may be overidden by user prefs
 var grid *fyne.Container
+var singleNotePage *widget.RichText
+var singleNoteStack *fyne.Container
+var mainGridContainer *container.Scroll
+var mainPageContainer *container.Scroll
 var mainApp fyne.App
 var viewLabel *widget.Label
+
 //var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
 var recentNotesLimit = 6 //default,  may be overidden by user prefs
 
@@ -84,6 +89,9 @@ func CreateMainWindow(){
 	//Main Grid container for displaying notes
 	grid = container.NewGridWrap(noteSize)
 
+	singleNotePage = widget.NewRichTextFromMarkdown("")
+	singleNoteStack = container.NewStack()
+
 	//Create The main panel
 	main := CreateMainPanel()
 
@@ -109,8 +117,10 @@ func CreateMainWindow(){
 
 func CreateMainPanel()(*fyne.Container){
 
-	mainContainer := container.NewScroll(grid)
-	mainStackedContainer := container.NewStack(mainContainer)
+	mainGridContainer = container.NewScroll(grid)
+	mainPageContainer = container.NewScroll(singleNoteStack)
+	mainStackedContainer := container.NewStack(mainPageContainer,mainGridContainer )
+
 	return mainStackedContainer
 }
 
@@ -118,6 +128,8 @@ func CreateTopPanel()(*fyne.Container){
 	viewLabel = widget.NewLabel("Pinned Notes")
 	viewLabelFixed := widget.NewLabel("Viewing: ")
 	spacer := widget.NewLabel("    ")
+
+
 
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.GridIcon(), func(){
@@ -132,7 +144,25 @@ func CreateTopPanel()(*fyne.Container){
 				UpdateView()
 			}
 		}),
+		widget.NewToolbarAction(theme.NavigateBackIcon(), func(){
+			if currentLayout == LAYOUT_PAGE{
+				if pageView.PageBack() > 0{
+					UpdateView()
+				}
+			}
+		}),
+		widget.NewToolbarAction(theme.NavigateNextIcon(), func(){
+			if currentLayout == LAYOUT_PAGE{
+				if pageView.PageForward() > 0{
+					UpdateView()
+				}
+
+			}
+		}),
 	)
+
+	//might be useful later if toolbar is global!!!!!!!!!!!!!!!
+	//toolbar.Items[0].ToolbarObject().Hide()
 
 	topPanel := container.NewHBox(spacer, viewLabelFixed, viewLabel, toolbar)
 	return topPanel
@@ -152,6 +182,7 @@ func CreateSidePanel()(*fyne.Container){
 		}
 		currentView = VIEW_PINNED
 		//ShowNotesInGrid(notes,noteSize)
+		pageView.Reset()
 		UpdateView()
 	})
 
@@ -167,6 +198,7 @@ func CreateSidePanel()(*fyne.Container){
 		}
 		currentView = VIEW_RECENT
 		//ShowNotesInGrid(notes,noteSize)
+		pageView.Reset()
 		UpdateView()
 	})
 
@@ -183,6 +215,7 @@ func CreateSidePanel()(*fyne.Container){
 				grid.RemoveAll()
 			}
 		}
+		pageView.Reset()
 	})
 
 
@@ -213,6 +246,7 @@ func CreateSidePanel()(*fyne.Container){
 				currentView = VIEW_NOTEBOOK
 				currentNotebook = notebooks[id]
 				//ShowNotesInGrid(notes, noteSize)
+				pageView.Reset()
 				UpdateView()
 			}
 		},
@@ -230,8 +264,12 @@ func CreateSidePanel()(*fyne.Container){
 
 
 func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
-	if grid == nil{
+	if grid == nil || mainGridContainer == nil{
 		return
+	}
+
+	if mainPageContainer != nil{
+		mainPageContainer.Hide()
 	}
 
 	grid.RemoveAll()
@@ -262,12 +300,13 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 		grid.Add(noteStack)
 	}
 	grid.Refresh()
+	mainGridContainer.Show()
 }
 
 func ShowNotesAsPages(notes []scribedb.NoteData){
-	//if grid != nil{
-	//	grid.Hide()
-	//}
+	if mainGridContainer != nil{
+		mainGridContainer.Hide()
+	}
 
 	pageView.NumberOfPages = len(notes)
 	if pageView.CurrentPage ==0{
@@ -291,8 +330,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 		Deleted: false,
 	}
 
-
-	if noteInfo.Id != 0{
+	/*if noteInfo.Id != 0{
 		noteInfo.NewNote = false
 	}else{
 		noteInfo.NewNote = true
@@ -302,14 +340,32 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 		noteInfo.Pinned = true
 	} else {
 		noteInfo.Pinned = false
-	}
+	}*/
 
 	//calculate initial note content hash
 	//note.UpdateHash(&noteInfo)
 
-	markdown := widget.NewRichTextFromMarkdown(noteInfo.Content)
-	markdown.Wrapping = fyne.TextWrapWord
-	grid.Add(markdown)
+	singleNotePage.ParseMarkdown(noteInfo.Content)
+	singleNotePage.Wrapping = fyne.TextWrapWord
+	singleNotePage.Refresh()
+
+	themeBackground := canvas.NewRectangle(themeBgColour)
+	noteColour,_ := RGBStringToFyneColor(noteInfo.Colour)
+	noteBackground := canvas.NewRectangle(noteColour)
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF"{
+		noteBackground = canvas.NewRectangle(themeBgColour) // colour not set or using the old scribe default note colour
+	}
+
+	colourStack := container.NewStack(noteBackground)
+	textPadded := container.NewPadded(themeBackground, singleNotePage)
+	noteStack:= container.NewStack(colourStack, textPadded)
+
+	singleNoteStack.RemoveAll()
+	singleNoteStack.Add(noteStack)
+
+	mainPageContainer.Show()
+	mainPageContainer.Refresh()
+
 }
 
 
