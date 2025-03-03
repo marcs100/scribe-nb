@@ -1,5 +1,13 @@
 package ui
 
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"scribe-nb/scribedb"
+	"image/color"
+)
+
 type PageView struct{
 	NumberOfPages int
 	CurrentPage int
@@ -26,3 +34,30 @@ func (pv *PageView) Reset(){
 	pv.NumberOfPages = 0
 }
 
+
+type AppContainers struct{
+	grid *fyne.Container
+	singleNoteStack *fyne.Container
+	mainGridContainer *container.Scroll
+	mainPageContainer *container.Scroll
+
+}
+
+type AppWidgets struct{
+	toolbar *widget.Toolbar
+	singleNotePage *widget.RichText
+}
+
+type AppStatus struct{
+	currentView string
+	currentNotebook string
+	currentLayout string
+	notes []scribedb.NoteData
+	themeBgColour color.Color
+}
+
+
+var appContainers AppContainers
+var appWidgets AppWidgets
+var pageView PageView
+var appStatus AppStatus

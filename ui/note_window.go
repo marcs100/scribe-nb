@@ -129,7 +129,7 @@ func OpenNoteWindow(noteId uint) {
 	spacerLabel := widget.NewLabel("      ")
 
 	scrolledMarkdown := container.NewScroll(markdown)
-	background := canvas.NewRectangle(themeBgColour)
+	background := canvas.NewRectangle(appStatus.themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
 	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
