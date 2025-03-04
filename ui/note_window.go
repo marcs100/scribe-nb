@@ -170,8 +170,8 @@ func OpenNoteWindow(noteId uint) {
 			}
 		} */
 
-		if index := slices.Index(openNotes,noteInfo.Id); index != -1{
-			openNotes = slices.Delete(openNotes,index,index+1)
+		if index := slices.Index(appStatus.openNotes,noteInfo.Id); index != -1{
+			appStatus.openNotes = slices.Delete(appStatus.openNotes,index,index+1)
 		}
 
 	})

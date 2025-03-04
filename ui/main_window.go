@@ -34,8 +34,6 @@ var viewLabel *widget.Label
 //var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
 var recentNotesLimit = 6 //default,  may be overidden by user prefs
 
-var openNotes []uint //maintain a list of notes that are currently open
-
 const VIEW_PINNED string = "pinned"
 const VIEW_RECENT string = "recent"
 const VIEW_NOTEBOOK string = "notebooks"
@@ -269,11 +267,11 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 	for _, note := range notes{
 		richText := newScribeNoteText(note.Content, func(){
 			//fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
-			if slices.Contains(openNotes, note.Id){
+			if slices.Contains(appStatus.openNotes, note.Id){
 				//note is already open
 				fmt.Println("note is already open")
 			}else{
-				openNotes = append(openNotes, note.Id)
+				appStatus.openNotes = append(appStatus.openNotes, note.Id)
 				OpenNoteWindow(note.Id)
 			}
 		})

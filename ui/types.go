@@ -54,10 +54,6 @@ type AppStatus struct{
 	currentLayout string
 	notes []scribedb.NoteData
 	themeBgColour color.Color
+	openNotes []uint //maintain a list of notes that are currently open
 }
 
-
-var appContainers AppContainers
-var appWidgets AppWidgets
-var pageView PageView
-var appStatus AppStatus
