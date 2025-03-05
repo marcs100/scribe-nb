@@ -9,8 +9,10 @@ type Config struct {
 
 
 type Settings struct{
-	database string
-	recentNotesLimit int
-	noteWidth float32
-	noteHeight float32
+	Database string
+	RecentNotesLimit int `toml:"recent_notes_limit"`
+	NoteWidth float32 `toml:"note_width"`
+	NoteHeight float32 `toml:"note_height"`
+	InitialView string `toml:"initial_view"`
+	InitialLayout string `toml:"initial_layout"`
 }

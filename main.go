@@ -2,24 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"scribe-nb/config"
 	"scribe-nb/scribedb"
 	"scribe-nb/ui"
-	"scribe-nb/config"
 )
 
 func main() {
+	var err error
+	var appConfig *config.Config
 	fmt.Println("Scribe Nota Deme v0.01")
 
 	conf_file := "/home/marc/.config/scribe/config.toml"
-
-	config.GetConfig(conf_file)
-
-
-	err := scribedb.Open()
-	defer scribedb.Close()
+	appConfig,err = config.GetConfig(conf_file)
 	if err != nil{
-		fmt.Println("Bollocks got error")
+		log.Panicln(err)
+		return
 	}
 
-	ui.StartUI()
+	err = scribedb.Open()
+	defer scribedb.Close()
+	if err != nil{
+		log.Panicln(err)
+	}
+
+	ui.StartUI(appConfig)
 }

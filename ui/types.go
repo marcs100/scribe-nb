@@ -8,12 +8,12 @@ import (
 	"image/color"
 )
 
-type PageView struct{
+type PageViewStatus struct{
 	NumberOfPages int
 	CurrentPage int
 }
 
-func (pv *PageView) PageForward() int{
+func (pv *PageViewStatus) PageForward() int{
 	if pv.CurrentPage < pv.NumberOfPages{
 		pv.CurrentPage += 1
 		return pv.CurrentPage
@@ -21,7 +21,7 @@ func (pv *PageView) PageForward() int{
 	return -1
 }
 
-func (pv *PageView) PageBack() int{
+func (pv *PageViewStatus) PageBack() int{
 	if pv.CurrentPage > 1{
 		pv.CurrentPage -= 1
 		return pv.CurrentPage
@@ -29,13 +29,13 @@ func (pv *PageView) PageBack() int{
 	return -1
 }
 
-func (pv *PageView) Reset(){
+func (pv *PageViewStatus) Reset(){
 	pv.CurrentPage = 0
 	pv.NumberOfPages = 0
 }
 
 
-type AppContainers struct{
+type ApplicationContainers struct{
 	grid *fyne.Container
 	singleNoteStack *fyne.Container
 	mainGridContainer *container.Scroll
@@ -43,17 +43,18 @@ type AppContainers struct{
 
 }
 
-type AppWidgets struct{
+type ApplicationWidgets struct{
 	toolbar *widget.Toolbar
 	singleNotePage *widget.RichText
 }
 
-type AppStatus struct{
+type ApplicationStatus struct{
 	currentView string
 	currentNotebook string
 	currentLayout string
 	notes []scribedb.NoteData
 	themeBgColour color.Color
 	openNotes []uint //maintain a list of notes that are currently open
+	noteSize fyne.Size
 }
 

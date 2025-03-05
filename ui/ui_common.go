@@ -1,9 +1,12 @@
 package ui
 
-import ()
+import (
+	"scribe-nb/config"
+)
 
-var appContainers AppContainers //structure containing pointers to fyne containers
-var appWidgets AppWidgets //structure containing pointers to fyne widgets
-var pageView PageView // structure to track page numbers
-var appStatus AppStatus // structure contauining various aoo status
+var AppContainers ApplicationContainers //structure containing pointers to fyne containers
+var AppWidgets ApplicationWidgets //structure containing pointers to fyne widgets
+var PageView PageViewStatus // structure to track page numbers
+var AppStatus ApplicationStatus // structure contauining various aoo status
+var Conf *config.Config
 

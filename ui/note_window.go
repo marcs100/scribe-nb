@@ -129,7 +129,7 @@ func OpenNoteWindow(noteId uint) {
 	spacerLabel := widget.NewLabel("      ")
 
 	scrolledMarkdown := container.NewScroll(markdown)
-	background := canvas.NewRectangle(appStatus.themeBgColour)
+	background := canvas.NewRectangle(AppStatus.themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
 	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
@@ -170,8 +170,8 @@ func OpenNoteWindow(noteId uint) {
 			}
 		} */
 
-		if index := slices.Index(appStatus.openNotes,noteInfo.Id); index != -1{
-			appStatus.openNotes = slices.Delete(appStatus.openNotes,index,index+1)
+		if index := slices.Index(AppStatus.openNotes,noteInfo.Id); index != -1{
+			AppStatus.openNotes = slices.Delete(AppStatus.openNotes,index,index+1)
 		}
 
 	})
