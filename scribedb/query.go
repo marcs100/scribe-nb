@@ -22,12 +22,12 @@ func GetPinnedNotes() ([]NoteData, error){
 
 
 func GetNotebook(notebookName string) ([]NoteData, error){
-	var query string = fmt.Sprintf("select * from notes where notebook = '%s'", notebookName)
+	var query string = fmt.Sprintf("select * from notes where notebook = '%s' order by modified desc", notebookName)
 	return getNotes(query)
 }
 
 func GetNotebooks() ([]string, error){
-	var query string = fmt.Sprintf("select distinct notebook from notes order by id desc")
+	var query string = fmt.Sprintf("select distinct notebook from notes order by notebook asc")
 	return getColumn(query)
 }
 

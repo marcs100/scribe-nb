@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	//"fyne.io/fyne/v2/data/binding"
 	//"github.com/fyne-io/terminal"
 )
 
@@ -51,7 +52,7 @@ func OpenNoteWindow(noteId uint) {
 	//calculate initial note content hash
 	note.UpdateHash(&noteInfo)
 
-	noteWindow := mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", retreievdNote.Notebook, retreievdNote.Id))
+	noteWindow := mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
 	noteWindow.Resize(fyne.NewSize(900, 750))
 
 	entry := widget.NewMultiLineEntry()
@@ -92,6 +93,30 @@ func OpenNoteWindow(noteId uint) {
 
 	})
 
+	changeNotebookBtn := widget.NewButton("Change Notebook", func(){
+		var notebooks []string
+		var err error
+		if notebooks, err = scribedb.GetNotebooks(); err != nil{
+			log.Println("Error getting notebook")
+			log.Panicln(err)
+		}
+		nbMenu := fyne.NewMenu("Select Notebook")
+
+		for _, notebook := range notebooks{
+			menuItem := fyne.NewMenuItem(notebook, func(){
+				noteInfo.Notebook = notebook
+				//fmt.Println("Change notebook to " + notebook)
+				noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+			})
+			nbMenu.Items = append(nbMenu.Items, menuItem)
+		}
+
+
+		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
+		//popUpMenu.ShowAtPosition(fyne.NewPos(100, 100))
+		popUpMenu.Show()
+
+	})
 
 	deleteBtn := widget.NewButton("Del", func(){
 		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
@@ -131,7 +156,7 @@ func OpenNoteWindow(noteId uint) {
 	scrolledMarkdown := container.NewScroll(markdown)
 	background := canvas.NewRectangle(AppStatus.themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
-	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn)
+	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn, changeNotebookBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)

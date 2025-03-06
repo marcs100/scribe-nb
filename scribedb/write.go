@@ -2,11 +2,8 @@ package scribedb
 
 import(
 	"errors"
-	//"fmt"
 	"time"
 	_ "github.com/mattn/go-sqlite3"
-
-
 )
 
 func PinNote(id uint)(int64, error){

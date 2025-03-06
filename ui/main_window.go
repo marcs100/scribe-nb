@@ -1,49 +1,22 @@
 package ui
 
 import (
-	//"image/color"
-	//"strconv"
 	"scribe-nb/scribedb"
 	"scribe-nb/note"
-
+	"scribe-nb/config"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
-	//"fyne.io/fyne/v2/layout"
-
-	//"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-
-	"scribe-nb/config"
-	//"fyne.io/fyne/v2/layout"
 	"errors"
 	"fmt"
 	"log"
 	"slices"
 )
 
-//var listPanel *fyne.Container
-//var noteWidth float32 = 500
-//var noteHeight float32 = 350
-//var toolbar *widget.Toolbar
-var mainApp fyne.App
-var viewLabel *widget.Label
-
-//var noteBorderSize = fyne.NewSize(noteWidth+3,noteHeight+3)
-//var recentNotesLimit = 6 //default,  may be overidden by user prefs
-
-const VIEW_PINNED string = "pinned"
-const VIEW_RECENT string = "recent"
-const VIEW_NOTEBOOK string = "notebooks"
-const VIEW_TAGS string = "tag"
-const LAYOUT_GRID = "grid"
-const LAYOUT_PAGE = "page"
-
-
 func StartUI(appConfigIn *config.Config){
-
 	Conf = appConfigIn
 	mainApp = app.New()
 	CreateMainWindow()
@@ -67,13 +40,6 @@ func CreateMainWindow(){
 	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth,Conf.AppSettings.NoteHeight)
 
 	mainWindow := mainApp.NewWindow("Scribe-NB")
-
-	// Options that wil be part of config file ************************
-	//noteSize = fyne.NewSize(500,400) //this should depend on resolution of current display
-	//recentNotesLimit = 6
-	//initialView := VIEW_PINNED
-	//initialLayout := LAYOUT_GRID
-	//**************************************************************
 
 	PageView.CurrentPage = 0
 	PageView.NumberOfPages = 0
@@ -135,7 +101,7 @@ func CreateTopPanel()(*fyne.Container){
 				UpdateView()
 			}
 		}),
-		widget.NewToolbarAction(theme.DocumentIcon(), func(){
+		widget.NewToolbarAction(theme.FileIcon(), func(){
 			if AppStatus.currentLayout != LAYOUT_PAGE{
 				AppStatus.currentLayout = LAYOUT_PAGE
 				UpdateView()
@@ -165,7 +131,15 @@ func CreateTopPanel()(*fyne.Container){
 
 func CreateSidePanel()(*fyne.Container){
 	var listPanel *fyne.Container
-	pinnedBtn := widget.NewButton("P", func(){
+
+	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func(){
+		if listPanel != nil{
+			listPanel.Hide()
+		}
+	})
+
+	//pinnedBtn := widget.NewButton("P", func(){
+	pinnedBtn := widget.NewButtonWithIcon("Pinned",theme.RadioButtonIcon() ,func(){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
@@ -181,7 +155,7 @@ func CreateSidePanel()(*fyne.Container){
 		UpdateView()
 	})
 
-	RecentBtn := widget.NewButton("R", func(){
+	RecentBtn := widget.NewButtonWithIcon("Recent",theme.HistoryIcon() ,func(){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
@@ -197,7 +171,7 @@ func CreateSidePanel()(*fyne.Container){
 		UpdateView()
 	})
 
-	notebooksBtn := widget.NewButton("N", func(){
+	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.DocumentIcon(), func(){
 		viewLabel.SetText("Notebooks")
 		if listPanel != nil{
 			if listPanel.Visible(){
@@ -219,12 +193,6 @@ func CreateSidePanel()(*fyne.Container){
 		log.Print("Error getting Notebooks: ")
 		log.Panic(err)
 	}
-	/*nbCovers,err := scribedb.GetNotebookCovers()
-	if err != nil{
-		log.Print("Error getting notrbook covers: ")
-		log.Panic(err)
-	}
-	sort.Strings(nbCovers)*/
 
 	notebooksList := widget.NewList(
 		func()int {
@@ -240,14 +208,15 @@ func CreateSidePanel()(*fyne.Container){
 				AppStatus.notes,_ = scribedb.GetNotebook(notebooks[id])
 				AppStatus.currentView = VIEW_NOTEBOOK
 				AppStatus.currentNotebook = notebooks[id]
-				//ShowNotesInGrid(notes, noteSize)
 				PageView.Reset()
 				UpdateView()
 			}
 		},
 	)
 
-	btnPanel := container.NewVBox(pinnedBtn, RecentBtn, notebooksBtn)
+	spacerLabel := widget.NewLabel(" ")
+
+	btnPanel := container.NewVBox(newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	listPanel = container.NewStack(notebooksList)
 	listPanel.Hide()
 

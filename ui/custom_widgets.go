@@ -21,8 +21,6 @@ func newScribeNoteText(content string, tapped func()) *scribeNoteText {
 	rt := &scribeNoteText{}
 	rt.AppendMarkdown(content)
 	rt.OnTapped = tapped
-	//rt.id = id
-	//rt.ExtendBaseWidget(rt)
 	return rt
 }
 
