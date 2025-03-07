@@ -59,7 +59,7 @@ func InsertNote(notebook string, content string, pinned uint, colour string)(int
 	var created = time.Now().String()[0:19]
 	var modified = created
 
-	res, err := db.Exec("INSERT INTO notes VALUES(NULL,?,?,?,?,?,?);",notebook, content, pinned, created, modified, colour)
+	res, err := db.Exec("INSERT INTO notes VALUES(NULL,?,?,?,?,?,?)",notebook, content, created, modified, pinned, colour)
 	rows,_ := res.RowsAffected()
 
 	return rows, err

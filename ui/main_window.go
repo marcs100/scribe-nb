@@ -46,7 +46,7 @@ func CreateMainWindow(){
 
 	//Main Grid container for displaying notes
 	grid := container.NewGridWrap(AppStatus.noteSize)
-	AppContainers.grid = grid //store to allow interaction in otehr functions
+	AppContainers.grid = grid //store to allow interaction in other functions
 
 	singleNotePage := widget.NewRichTextFromMarkdown("")
 	AppWidgets.singleNotePage = singleNotePage
@@ -68,9 +68,12 @@ func CreateMainWindow(){
 
 	//set default view and layout`
 	AppStatus.currentView = Conf.AppSettings.InitialView
+	fmt.Println("initial view = "+ Conf.AppSettings.InitialView)
 	AppStatus.currentLayout = Conf.AppSettings.InitialLayout
 
-	UpdateView()
+	if err := UpdateView(); err != nil{
+		fmt.Println(err)
+	}
 
 	mainWindow.ShowAndRun()
 }
@@ -136,6 +139,7 @@ func CreateSidePanel()(*fyne.Container){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
+		OpenNoteWindow(0) //new note has id=0
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
@@ -364,6 +368,8 @@ func UpdateView()error{
 			AppWidgets.toolbar.Items[2].ToolbarObject().Show()
 			AppWidgets.toolbar.Items[3].ToolbarObject().Show()
 			ShowNotesAsPages(AppStatus.notes)
+		default:
+			err = errors.New("undefined layout")
 	}
 
 	return err

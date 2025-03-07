@@ -18,22 +18,46 @@ import (
 
 func OpenNoteWindow(noteId uint) {
 	var PinBtn *widget.Button
+	var err error
+	var retrievedNote scribedb.NoteData
+	var noteInfo note.NoteInfo
 
-	retreievdNote, err := scribedb.GetNote(noteId)
+	if noteId == 0{
+		//New note
+		noteInfo = note.NoteInfo{
+			Id: noteId,
+			Notebook: "General",
+			DateCreated: "",
+			DateModified: "",
+			Pinned: false,
+			Colour: "#FFFFFF",
+			Content: "",
+			Deleted: false,
+		}
+	}else{
+		//existing note
+		retrievedNote, err = scribedb.GetNote(noteId)
 
-	if err != nil{
-		log.Println("error getting note")
-		log.Panic(err)
-	}
+		if err != nil{
+			log.Println("error getting note")
+			log.Panic(err)
+		}
 
-	noteInfo := note.NoteInfo{
-		Id: retreievdNote.Id,
-		Notebook: retreievdNote.Notebook,
-		DateCreated: retreievdNote.Created,
-		DateModified: retreievdNote.Modified,
-		Colour: retreievdNote.BackgroundColour,
-		Content: retreievdNote.Content,
-		Deleted: false,
+		noteInfo = note.NoteInfo{
+			Id: retrievedNote.Id,
+			Notebook: retrievedNote.Notebook,
+			DateCreated: retrievedNote.Created,
+			DateModified: retrievedNote.Modified,
+			Colour: retrievedNote.BackgroundColour,
+			Content: retrievedNote.Content,
+			Deleted: false,
+		}
+
+		if retrievedNote.Pinned > 0{
+			noteInfo.Pinned = true
+		} else {
+			noteInfo.Pinned = false
+		}
 	}
 
 
@@ -41,12 +65,6 @@ func OpenNoteWindow(noteId uint) {
 		noteInfo.NewNote = false
 	}else{
 		noteInfo.NewNote = true
-	}
-
-	if retreievdNote.Pinned > 0{
-		noteInfo.Pinned = true
-	} else {
-		noteInfo.Pinned = false
 	}
 
 	//calculate initial note content hash
@@ -71,8 +89,16 @@ func OpenNoteWindow(noteId uint) {
 	fmt.Println("label is "+ btnLabel)
 
 	PinBtn = widget.NewButton(btnLabel, func(){
+		var res int64
+		var err error = nil
 		if noteInfo.Pinned{
-			res,err := scribedb.UnpinNote(noteInfo.Id)
+			if noteInfo.Id == 0{
+				//new note that hasn't been saved yet'
+				res = 1
+			}else{
+				res,err = scribedb.UnpinNote(noteInfo.Id)
+			}
+
 			if err == nil && res==1{
 				noteInfo.Pinned = false
 				if PinBtn != nil{
@@ -81,7 +107,12 @@ func OpenNoteWindow(noteId uint) {
 				}
 			}
 		}else{
-			res,err := scribedb.PinNote(noteInfo.Id)
+			if noteInfo.Id == 0{
+				//new note that hasn't been saved yet'
+				res = 1
+			}else{
+				res,err = scribedb.PinNote(noteInfo.Id)
+			}
 			if err == nil && res==1{
 				noteInfo.Pinned = true
 				if PinBtn != nil{
@@ -164,7 +195,14 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
 		noteInfo.Content = entry.Text
-		contentChanged, paramsChanged := note.CheckChanges(&retreievdNote,&noteInfo)
+		var contentChanged, paramsChanged bool = false, false
+		if noteInfo.NewNote{
+			if noteInfo.Content != ""{
+				contentChanged = true
+			}
+		}else{
+			contentChanged, paramsChanged = note.CheckChanges(&retrievedNote,&noteInfo)
+		}
 		//if contentChanged{
 		if contentChanged || paramsChanged{
 			res, err := note.SaveNote(&noteInfo)

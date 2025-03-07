@@ -13,7 +13,7 @@ func main() {
 	var appConfig *config.Config
 	fmt.Println("Scribe Nota Deme v0.01")
 
-	conf_file := "/home/marc/.config/scribe/config.toml"
+	conf_file := "/home/marc/.config/scribe-nb/config.toml"
 	appConfig,err = config.GetConfig(conf_file)
 	if err != nil{
 		log.Panicln(err)
