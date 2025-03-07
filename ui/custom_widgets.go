@@ -17,11 +17,31 @@ func (sn *scribeNoteText) Tapped(*fyne.PointEvent) {
 	}
 }
 
-func newScribeNoteText(content string, tapped func()) *scribeNoteText {
+func NewScribeNoteText(content string, tapped func()) *scribeNoteText {
 	rt := &scribeNoteText{}
 	rt.AppendMarkdown(content)
 	rt.OnTapped = tapped
 	return rt
+}
+
+
+type buttonWithPos struct {
+	widget.Button
+	OnTapped func(*fyne.PointEvent)
+}
+
+//Implement onTapped with mouse position for this widget
+func (bn *buttonWithPos) Tapped(e *fyne.PointEvent) {
+	if bn.OnTapped != nil {
+		bn.OnTapped(e)
+	}
+}
+
+func NewButtonWithPos(label string, tapped func(*fyne.PointEvent)) *buttonWithPos {
+	bn := &buttonWithPos{}
+	bn.Text = label
+	bn.OnTapped = tapped
+	return bn
 }
 
 

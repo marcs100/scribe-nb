@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/theme"
 	//"fyne.io/fyne/v2/data/binding"
 	//"github.com/fyne-io/terminal"
 )
@@ -81,14 +82,14 @@ func OpenNoteWindow(noteId uint) {
 	markdown.Wrapping = fyne.TextWrapWord
 	markdown.Hide()
 
-	var btnLabel = "Pin"
+	//var btnLabel = "Pin"
+	btnIcon := theme.RadioButtonIcon()
 	if noteInfo.Pinned {
-		btnLabel = "Unpin"
+		btnIcon = theme.RadioButtonCheckedIcon()
+		//btnLabel = "Unpin"
 	}
 
-	fmt.Println("label is "+ btnLabel)
-
-	PinBtn = widget.NewButton(btnLabel, func(){
+	PinBtn = widget.NewButtonWithIcon("Pin", btnIcon , func(){
 		var res int64
 		var err error = nil
 		if noteInfo.Pinned{
@@ -102,7 +103,7 @@ func OpenNoteWindow(noteId uint) {
 			if err == nil && res==1{
 				noteInfo.Pinned = false
 				if PinBtn != nil{
-					PinBtn.SetText("Pin")
+					PinBtn.SetIcon(theme.RadioButtonIcon())
 					PinBtn.Refresh()
 				}
 			}
@@ -116,7 +117,7 @@ func OpenNoteWindow(noteId uint) {
 			if err == nil && res==1{
 				noteInfo.Pinned = true
 				if PinBtn != nil{
-					PinBtn.SetText("UnPin")
+					PinBtn.SetIcon(theme.RadioButtonCheckedIcon())
 					PinBtn.Refresh()
 				}
 			}
@@ -124,7 +125,7 @@ func OpenNoteWindow(noteId uint) {
 
 	})
 
-	changeNotebookBtn := widget.NewButton("Change Notebook", func(){
+	changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
 		var notebooks []string
 		var err error
 		if notebooks, err = scribedb.GetNotebooks(); err != nil{
@@ -144,7 +145,8 @@ func OpenNoteWindow(noteId uint) {
 
 
 		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
-		popUpMenu.Show()
+		//popUpMenu.Show()
+		popUpMenu.ShowAtPosition(e.Position)
 
 	})
 

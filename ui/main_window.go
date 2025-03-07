@@ -127,8 +127,6 @@ func CreateTopPanel()(*fyne.Container){
 	)
 
 	AppWidgets.toolbar = toolbar
-	//topPanel := container.NewHBox(spacer, toolbar, viewLabelFixed, viewLabel)
-	//hbox := container.NewHBox(toolbar)
 	topPanel := container.New(layout.NewHBoxLayout(), layout.NewSpacer(),toolbar, viewLabelFixed, viewLabel, layout.NewSpacer() )
 
 	return topPanel
@@ -145,7 +143,7 @@ func CreateSidePanel()(*fyne.Container){
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
-	pinnedBtn := widget.NewButtonWithIcon("Pinned",theme.RadioButtonIcon() ,func(){
+	pinnedBtn := widget.NewButtonWithIcon("Pinned",theme.RadioButtonCheckedIcon() ,func(){
 		if listPanel != nil{
 			listPanel.Hide()
 		}
@@ -172,7 +170,6 @@ func CreateSidePanel()(*fyne.Container){
 			log.Panic(err)
 		}
 		AppStatus.currentView = VIEW_RECENT
-		//ShowNotesInGrid(notes,noteSize)
 		PageView.Reset()
 		UpdateView()
 	})
@@ -244,7 +241,7 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 
 	AppContainers.grid.RemoveAll()
 	for _, note := range notes{
-		richText := newScribeNoteText(note.Content, func(){
+		richText := NewScribeNoteText(note.Content, func(){
 			//fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
 			if slices.Contains(AppStatus.openNotes, note.Id){
 				//note is already open
