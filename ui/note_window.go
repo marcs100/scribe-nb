@@ -92,7 +92,7 @@ func OpenNoteWindow(noteId uint) {
 		var res int64
 		var err error = nil
 		if noteInfo.Pinned{
-			if noteInfo.Id == 0{
+			if noteInfo.NewNote{
 				//new note that hasn't been saved yet'
 				res = 1
 			}else{
@@ -144,7 +144,6 @@ func OpenNoteWindow(noteId uint) {
 
 
 		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
-		//popUpMenu.ShowAtPosition(fyne.NewPos(100, 100))
 		popUpMenu.Show()
 
 	})
@@ -152,7 +151,14 @@ func OpenNoteWindow(noteId uint) {
 	deleteBtn := widget.NewButton("Del", func(){
 		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
 			if confirm{
-				res, err := scribedb.DeleteNote(noteInfo.Id)
+				var res int64
+				var err error = nil
+				if noteInfo.NewNote{
+					res = 1;
+				}else{
+					res, err = scribedb.DeleteNote(noteInfo.Id)
+				}
+
 				if res == 0 || err != nil{
 					log.Println("Error deleing notes")
 				}else{
@@ -187,7 +193,7 @@ func OpenNoteWindow(noteId uint) {
 	scrolledMarkdown := container.NewScroll(markdown)
 	background := canvas.NewRectangle(AppStatus.themeBgColour)
 	content := container.NewStack(background, entry, scrolledMarkdown)
-	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, deleteBtn, changeNotebookBtn)
+	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, changeNotebookBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)

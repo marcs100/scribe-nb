@@ -1,19 +1,21 @@
 package ui
 
 import (
-	"scribe-nb/scribedb"
-	"scribe-nb/note"
+	"errors"
+	"fmt"
+	"log"
 	"scribe-nb/config"
+	"scribe-nb/note"
+	"scribe-nb/scribedb"
+	"slices"
+
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"errors"
-	"fmt"
-	"log"
-	"slices"
 )
 
 func StartUI(appConfigIn *config.Config){
@@ -91,11 +93,8 @@ func CreateMainPanel()(*fyne.Container){
 }
 
 func CreateTopPanel()(*fyne.Container){
-	viewLabel = widget.NewLabel("Pinned Notes")
+	viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	viewLabelFixed := widget.NewLabel("Viewing: ")
-	spacer := widget.NewLabel("    ")
-
-
 
 	toolbar  := widget.NewToolbar(
 		widget.NewToolbarAction(theme.GridIcon(), func(){
@@ -128,7 +127,10 @@ func CreateTopPanel()(*fyne.Container){
 	)
 
 	AppWidgets.toolbar = toolbar
-	topPanel := container.NewHBox(spacer, viewLabelFixed, viewLabel, toolbar)
+	//topPanel := container.NewHBox(spacer, toolbar, viewLabelFixed, viewLabel)
+	//hbox := container.NewHBox(toolbar)
+	topPanel := container.New(layout.NewHBoxLayout(), layout.NewSpacer(),toolbar, viewLabelFixed, viewLabel, layout.NewSpacer() )
+
 	return topPanel
 }
 
