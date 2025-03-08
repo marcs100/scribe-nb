@@ -24,7 +24,7 @@ func NewScribeNoteText(content string, tapped func()) *scribeNoteText {
 	return rt
 }
 
-
+/*
 type buttonWithPos struct {
 	widget.Button
 	OnTapped func(*fyne.PointEvent)
@@ -42,6 +42,6 @@ func NewButtonWithPos(label string, tapped func(*fyne.PointEvent)) *buttonWithPo
 	bn.Text = label
 	bn.OnTapped = tapped
 	return bn
-}
+}*/
 
 

@@ -89,7 +89,7 @@ func OpenNoteWindow(noteId uint) {
 		//btnLabel = "Unpin"
 	}
 
-	PinBtn = widget.NewButtonWithIcon("Pin", btnIcon , func(){
+	PinBtn = widget.NewButtonWithIcon("", btnIcon , func(){
 		var res int64
 		var err error = nil
 		if noteInfo.Pinned{
@@ -125,7 +125,8 @@ func OpenNoteWindow(noteId uint) {
 
 	})
 
-	changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
+	//changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
+	changeNotebookBtn := widget.NewButtonWithIcon("", theme.FolderOpenIcon(), func(){
 		var notebooks []string
 		var err error
 		if notebooks, err = scribedb.GetNotebooks(); err != nil{
@@ -146,11 +147,13 @@ func OpenNoteWindow(noteId uint) {
 
 		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
 		//popUpMenu.Show()
-		popUpMenu.ShowAtPosition(e.Position)
+		pos := fyne.NewPos(350,0)
+		popUpMenu.ShowAtPosition(pos)
+		//popUpMenu.ShowAtPosition(e.Position.AddXY(150,0))
 
 	})
 
-	deleteBtn := widget.NewButton("Del", func(){
+	deleteBtn := widget.NewButtonWithIcon("",theme.DeleteIcon() , func(){
 		dialog.ShowConfirm("Delete note","Are you sure?",func(confirm bool){
 			if confirm{
 				var res int64
@@ -194,7 +197,7 @@ func OpenNoteWindow(noteId uint) {
 
 	scrolledMarkdown := container.NewScroll(markdown)
 	background := canvas.NewRectangle(AppStatus.themeBgColour)
-	content := container.NewStack(background, entry, scrolledMarkdown)
+	content := container.NewStack(background, scrolledMarkdown, entry)
 	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, changeNotebookBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 

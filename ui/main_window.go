@@ -174,7 +174,7 @@ func CreateSidePanel()(*fyne.Container){
 		UpdateView()
 	})
 
-	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.DocumentIcon(), func(){
+	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func(){
 		viewLabel.SetText("Notebooks")
 		if listPanel != nil{
 			if listPanel.Visible(){
