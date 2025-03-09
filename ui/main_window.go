@@ -20,7 +20,7 @@ import (
 
 func StartUI(appConfigIn *config.Config){
 	Conf = appConfigIn
-	mainApp = app.New()
+	mainApp = app.NewWithID("scribe-nb")
 	CreateMainWindow()
 }
 

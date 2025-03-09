@@ -2,17 +2,18 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"scribe-nb/note"
 	"scribe-nb/scribedb"
 	"slices"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	//"fyne.io/fyne/v2/data/binding"
 	//"github.com/fyne-io/terminal"
 )
@@ -147,10 +148,22 @@ func OpenNoteWindow(noteId uint) {
 
 		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
 		//popUpMenu.Show()
-		pos := fyne.NewPos(350,0)
+		pos := fyne.NewPos(250,40)
 		popUpMenu.ShowAtPosition(pos)
 		//popUpMenu.ShowAtPosition(e.Position.AddXY(150,0))
 
+	})
+
+	colourButton := widget.NewButtonWithIcon("",theme.ColorPaletteIcon(), func(){
+		picker := dialog.NewColorPicker("Note Color", "Pick colour", func(c color.Color){
+			fmt.Println(c)
+			// need to convert to rgb string
+			hex := FyneColourToRGBHex(c)
+			noteInfo.Colour = fmt.Sprintf("%s%s","#",hex)
+
+		} ,noteWindow)
+		picker.Advanced = true
+		picker.Show()
 	})
 
 	deleteBtn := widget.NewButtonWithIcon("",theme.DeleteIcon() , func(){
@@ -198,7 +211,7 @@ func OpenNoteWindow(noteId uint) {
 	scrolledMarkdown := container.NewScroll(markdown)
 	background := canvas.NewRectangle(AppStatus.themeBgColour)
 	content := container.NewStack(background, scrolledMarkdown, entry)
-	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, changeNotebookBtn, deleteBtn)
+	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, colourButton, changeNotebookBtn, deleteBtn)
 	win := container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)
