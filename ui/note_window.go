@@ -79,9 +79,32 @@ func OpenNoteWindow(noteId uint) {
 	entry.Text = noteInfo.Content
 	entry.Wrapping = fyne.TextWrapWord
 
-	markdown := widget.NewRichTextFromMarkdown(noteInfo.Content)
-	markdown.Wrapping = fyne.TextWrapWord
-	markdown.Hide()
+	themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
+	noteColour,_ := RGBStringToFyneColor(noteInfo.Colour)
+
+	noteBackground := canvas.NewRectangle(noteColour)
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF"{
+		noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
+	}
+
+	colourStack := container.NewStack(noteBackground)
+
+	markdownText := widget.NewRichTextFromMarkdown(noteInfo.Content)
+	markdownText.Wrapping = fyne.TextWrapWord
+	markdownText.Hide()
+	markdownPadded := container.NewPadded(themeBackground, markdownText)
+	markdown:= container.NewStack(colourStack, markdownPadded)
+
+
+
+	spacerLabel := widget.NewLabel("      ")
+
+	scrolledMarkdown := container.NewScroll(markdown)
+	background := canvas.NewRectangle(AppStatus.themeBgColour)
+	content := container.NewStack(background, scrolledMarkdown, entry)
+
+	var win *fyne.Container
+
 
 	//var btnLabel = "Pin"
 	btnIcon := theme.RadioButtonIcon()
@@ -157,10 +180,13 @@ func OpenNoteWindow(noteId uint) {
 	colourButton := widget.NewButtonWithIcon("",theme.ColorPaletteIcon(), func(){
 		picker := dialog.NewColorPicker("Note Color", "Pick colour", func(c color.Color){
 			fmt.Println(c)
-			// need to convert to rgb string
 			hex := FyneColourToRGBHex(c)
 			noteInfo.Colour = fmt.Sprintf("%s%s","#",hex)
-
+			noteColour,err = RGBStringToFyneColor(fmt.Sprintf("%s%s","#",hex))
+			if err != nil{
+				log.Panicln(err)
+			}
+			noteBackground.FillColor = c
 		} ,noteWindow)
 		picker.Advanced = true
 		picker.Show()
@@ -191,6 +217,7 @@ func OpenNoteWindow(noteId uint) {
 	modeWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string){
 		switch value{
 			case "Edit":
+				markdownText.Hide()
 				markdown.Hide()
 				deleteBtn.Show()
 				noteWindow.Canvas().Focus(entry) //this seems to make no difference!!!
@@ -198,21 +225,16 @@ func OpenNoteWindow(noteId uint) {
 			case "View":
 				entry.Hide()
 				deleteBtn.Hide()
-				markdown.ParseMarkdown(entry.Text)
+				markdownText.ParseMarkdown(entry.Text)
+				markdownText.Show()
 				markdown.Show()
 		}
 	})
 
 	modeWidget.SetSelected("View")
 	modeWidget.Horizontal = true;
-
-	spacerLabel := widget.NewLabel("      ")
-
-	scrolledMarkdown := container.NewScroll(markdown)
-	background := canvas.NewRectangle(AppStatus.themeBgColour)
-	content := container.NewStack(background, scrolledMarkdown, entry)
 	toolbar := container.NewHBox(modeWidget,spacerLabel, PinBtn, colourButton, changeNotebookBtn, deleteBtn)
-	win := container.NewBorder(toolbar, nil,nil,nil,content)
+	win = container.NewBorder(toolbar, nil,nil,nil,content)
 
 	noteWindow.SetContent(win)
 	noteWindow.Canvas().Focus(entry)
