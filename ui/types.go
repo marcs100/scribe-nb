@@ -1,11 +1,13 @@
 package ui
 
 import (
+	"fmt"
+	"image/color"
+	"scribe-nb/scribedb"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"scribe-nb/scribedb"
-	"image/color"
 )
 
 type PageViewStatus struct{
@@ -34,6 +36,10 @@ func (pv *PageViewStatus) Reset(){
 	pv.NumberOfPages = 0
 }
 
+func (pv *PageViewStatus) GetLabel()string{
+	return fmt.Sprintf("Page: %d of %d",pv.CurrentPage,pv.NumberOfPages)
+}
+
 
 type ApplicationContainers struct{
 	grid *fyne.Container
@@ -46,6 +52,8 @@ type ApplicationContainers struct{
 type ApplicationWidgets struct{
 	toolbar *widget.Toolbar
 	singleNotePage *widget.RichText
+	viewLabel *widget.Label
+	pageLabel *widget.Label
 }
 
 type ApplicationStatus struct{

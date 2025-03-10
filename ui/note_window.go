@@ -94,9 +94,6 @@ func OpenNoteWindow(noteId uint) {
 	markdownText.Hide()
 	markdownPadded := container.NewPadded(themeBackground, markdownText)
 	markdown:= container.NewStack(colourStack, markdownPadded)
-
-
-
 	spacerLabel := widget.NewLabel("      ")
 
 	scrolledMarkdown := container.NewScroll(markdown)

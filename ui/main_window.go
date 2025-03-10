@@ -43,9 +43,6 @@ func CreateMainWindow(){
 
 	mainWindow := mainApp.NewWindow("Scribe-NB")
 
-	PageView.CurrentPage = 0
-	PageView.NumberOfPages = 0
-
 	//Main Grid container for displaying notes
 	grid := container.NewGridWrap(AppStatus.noteSize)
 	AppContainers.grid = grid //store to allow interaction in other functions
@@ -54,6 +51,9 @@ func CreateMainWindow(){
 	AppWidgets.singleNotePage = singleNotePage
 	singleNoteStack := container.NewStack()
 	AppContainers.singleNoteStack = singleNoteStack
+
+	PageView.CurrentPage = 0
+	PageView.NumberOfPages = 0
 
 	//Create The main panel
 	main := CreateMainPanel()
@@ -93,8 +93,13 @@ func CreateMainPanel()(*fyne.Container){
 }
 
 func CreateTopPanel()(*fyne.Container){
-	viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	viewLabelFixed := widget.NewLabel("Viewing: ")
+	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	spacerLabel := widget.NewLabel("                                ")
+
+
+
+	AppWidgets.pageLabel = widget.NewLabel("Page: ")
+	AppWidgets.pageLabel.Hide()
 
 	toolbar  := widget.NewToolbar(
 		widget.NewToolbarAction(theme.GridIcon(), func(){
@@ -127,7 +132,7 @@ func CreateTopPanel()(*fyne.Container){
 	)
 
 	AppWidgets.toolbar = toolbar
-	topPanel := container.New(layout.NewHBoxLayout(), layout.NewSpacer(),toolbar, viewLabelFixed, viewLabel, layout.NewSpacer() )
+	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),toolbar, AppWidgets.pageLabel, layout.NewSpacer() )
 
 	return topPanel
 }
@@ -175,7 +180,7 @@ func CreateSidePanel()(*fyne.Container){
 	})
 
 	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func(){
-		viewLabel.SetText("Notebooks")
+		AppWidgets.viewLabel.SetText("Notebooks")
 		if listPanel != nil{
 			if listPanel.Visible(){
 				listPanel.Hide()
@@ -238,6 +243,8 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 	if AppContainers.mainPageContainer != nil{
 		AppContainers.mainPageContainer.Hide()
 	}
+
+	AppWidgets.pageLabel.Hide()
 
 	AppContainers.grid.RemoveAll()
 	for _, note := range notes{
@@ -312,6 +319,9 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 	//calculate initial note content hash
 	//note.UpdateHash(&noteInfo)
 
+	AppWidgets.pageLabel.SetText(PageView.GetLabel())
+	AppWidgets.pageLabel.Show()
+
 	AppWidgets.singleNotePage.ParseMarkdown(noteInfo.Content)
 	AppWidgets.singleNotePage.Wrapping = fyne.TextWrapWord
 	AppWidgets.singleNotePage.Refresh()
@@ -342,13 +352,13 @@ func UpdateView()error{
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
 	switch AppStatus.currentView{
 		case VIEW_PINNED:
-			viewLabel.SetText("Pinned Notes")
+			AppWidgets.viewLabel.SetText("Pinned Notes")
 			AppStatus.notes, err = scribedb.GetPinnedNotes()
 		case VIEW_RECENT:
-			viewLabel.SetText(("Recent Notes"))
+			AppWidgets.viewLabel.SetText(("Recent Notes"))
 			AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
 		case VIEW_NOTEBOOK:
-			viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
+			AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
 			AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
 		default:
 			err = errors.New("undefined view")
