@@ -31,6 +31,20 @@ func GetNotebooks() ([]string, error){
 	return getColumn(query)
 }
 
+func CheckNotebookExists(notebook string)(bool, error){
+	var query string = fmt.Sprintf("select notebook from notes where notebook = '%s'", notebook)
+	notebooks, err := getColumn(query)
+	if err != nil{
+		return true, err
+	}
+
+	if len(notebooks) > 0{
+		return true, err
+	}
+
+	return false, err
+}
+
 
 func GetRecentNotes(noteCount int) ([]NoteData, error){
 	var query string = fmt.Sprintf("select * from notes order by modified desc LIMIT %d", noteCount)

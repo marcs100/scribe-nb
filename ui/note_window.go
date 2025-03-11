@@ -156,6 +156,34 @@ func OpenNoteWindow(noteId uint) {
 		}
 		nbMenu := fyne.NewMenu("Select Notebook")
 
+		//Add new notebook entry to menu
+		nbMenuItem := fyne.NewMenuItem("*New*",func(){
+			fmt.Println("Need to ask use for new notebook name here!!!!!!!!")
+			notebookEntry := widget.NewEntry()
+			eNotebookEntry := widget.NewFormItem("Name", notebookEntry)
+			newNotebookDialog := dialog.NewForm("New Notebook?", "OK", "Cancel", []*widget.FormItem{eNotebookEntry}, func(confirmed bool) {
+				if confirmed{
+					//check that the notebook does not already exist
+					exists, err := scribedb.CheckNotebookExists(notebookEntry.Text)
+					if (err == nil){
+						if exists == false{
+							//chnage notebook to this new notebook
+							noteInfo.Notebook = notebookEntry.Text
+							noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+							//now need to update the notebooks widget list
+							//NOT YET IMPLEMENTED!!!!!!!!!!!!!!
+						}
+					}else{
+						log.Panicln(fmt.Sprintf("Error check notebook exists: %s",err))
+					}
+				}
+			}, noteWindow)
+			newNotebookDialog.Show()
+		})
+
+		nbMenu.Items = append(nbMenu.Items, nbMenuItem)
+
+		//Now add all the existing notebooks to the menu
 		for _, notebook := range notebooks{
 			menuItem := fyne.NewMenuItem(notebook, func(){
 				noteInfo.Notebook = notebook
