@@ -46,6 +46,7 @@ type ApplicationContainers struct{
 	singleNoteStack *fyne.Container
 	mainGridContainer *container.Scroll
 	mainPageContainer *container.Scroll
+	listPanel *fyne.Container
 
 }
 
@@ -54,6 +55,7 @@ type ApplicationWidgets struct{
 	singleNotePage *widget.RichText
 	viewLabel *widget.Label
 	pageLabel *widget.Label
+	notebooksList *widget.List
 }
 
 type ApplicationStatus struct{
