@@ -170,8 +170,12 @@ func OpenNoteWindow(noteId uint) {
 							//chnage notebook to this new notebook
 							noteInfo.Notebook = notebookEntry.Text
 							noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
-							//now need to update the notebooks widget list
-							//NOT YET IMPLEMENTED!!!!!!!!!!!!!!
+							_,err = note.SaveNote(&noteInfo)
+							if err != nil{
+								log.Print("Error saving note: ")
+								log.Panic(err)
+							}
+							UpdateNotebooksList()
 						}
 					}else{
 						log.Panicln(fmt.Sprintf("Error check notebook exists: %s",err))
@@ -311,3 +315,5 @@ func OpenNoteWindow(noteId uint) {
 	})
 	noteWindow.Show()
 }
+
+

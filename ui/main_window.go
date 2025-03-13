@@ -138,18 +138,19 @@ func CreateTopPanel()(*fyne.Container){
 }
 
 func CreateSidePanel()(*fyne.Container){
+	var listPanel *fyne.Container
 
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func(){
-		if AppContainers.listPanel != nil{
-			AppContainers.listPanel.Hide()
+		if listPanel != nil{
+			listPanel.Hide()
 		}
 		OpenNoteWindow(0) //new note has id=0
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
 	pinnedBtn := widget.NewButtonWithIcon("Pinned",theme.RadioButtonCheckedIcon() ,func(){
-		if AppContainers.listPanel != nil{
-			AppContainers.listPanel.Hide()
+		if listPanel != nil{
+			listPanel.Hide()
 		}
 		var err error
 		AppStatus.notes,err = scribedb.GetPinnedNotes()
@@ -164,8 +165,8 @@ func CreateSidePanel()(*fyne.Container){
 	})
 
 	RecentBtn := widget.NewButtonWithIcon("Recent",theme.HistoryIcon() ,func(){
-		if AppContainers.listPanel != nil{
-			AppContainers.listPanel.Hide()
+		if listPanel != nil{
+			listPanel.Hide()
 		}
 		var err error
 		AppStatus.notes,err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
@@ -182,13 +183,12 @@ func CreateSidePanel()(*fyne.Container){
 
 	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func(){
 		AppWidgets.viewLabel.SetText("Notebooks")
-		CreateNotebooksList()
-		AppContainers.listPanel.Refresh()
-		if AppContainers.listPanel != nil{
-			if AppContainers.listPanel.Visible(){
-				AppContainers.listPanel.Hide()
+		UpdateNotebooksList()
+		if listPanel != nil{
+			if listPanel.Visible(){
+				listPanel.Hide()
 			}else{
-				AppContainers.listPanel.Show()
+				listPanel.Show()
 			}
 
 			if AppContainers.grid != nil{
@@ -201,11 +201,11 @@ func CreateSidePanel()(*fyne.Container){
 	spacerLabel := widget.NewLabel(" ")
 
 	btnPanel := container.NewVBox(newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
-	AppContainers.listPanel = container.NewStack(AppWidgets.notebooksList)
-	AppContainers.listPanel.Hide()
+	listPanel = container.NewStack(AppWidgets.notebooksList)
+	listPanel.Hide()
 
 
-	sideContainer := container.NewHBox(btnPanel,AppContainers.listPanel)
+	sideContainer := container.NewHBox(btnPanel,listPanel)
 
 	return sideContainer
 }
@@ -361,29 +361,40 @@ func UpdateView()error{
 }
 
 func CreateNotebooksList(){
-	notebooks,err := scribedb.GetNotebooks()
+	var err error
+	AppStatus.notebooks,err = scribedb.GetNotebooks()
 	if err != nil{
 		log.Print("Error getting Notebooks: ")
 		log.Panic(err)
 	}
 	AppWidgets.notebooksList = widget.NewList(
 		func()int {
-			return len(notebooks)
+			return len(AppStatus.notebooks)
 		},
 		func() fyne.CanvasObject{
 			return widget.NewButton("------------Notebooks------------", func(){})
 
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Button).SetText(notebooks[id])
+			o.(*widget.Button).SetText(AppStatus.notebooks[id])
 			o.(*widget.Button).OnTapped = func(){
-				AppStatus.notes,_ = scribedb.GetNotebook(notebooks[id])
+				AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
 				AppStatus.currentView = VIEW_NOTEBOOK
-				AppStatus.currentNotebook = notebooks[id]
+				AppStatus.currentNotebook = AppStatus.notebooks[id]
 				PageView.Reset()
 				UpdateView()
 			}
 		},
 	)
 
+}
+
+func UpdateNotebooksList(){
+	var err error
+	AppStatus.notebooks,err = scribedb.GetNotebooks()
+	if err != nil{
+		log.Print("Error getting Notebooks: ")
+		log.Panic(err)
+	}
+	AppWidgets.notebooksList.Refresh()
 }

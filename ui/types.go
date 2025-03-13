@@ -46,8 +46,6 @@ type ApplicationContainers struct{
 	singleNoteStack *fyne.Container
 	mainGridContainer *container.Scroll
 	mainPageContainer *container.Scroll
-	listPanel *fyne.Container
-
 }
 
 type ApplicationWidgets struct{
@@ -63,6 +61,7 @@ type ApplicationStatus struct{
 	currentNotebook string
 	currentLayout string
 	notes []scribedb.NoteData
+	notebooks []string
 	themeBgColour color.Color
 	openNotes []uint //maintain a list of notes that are currently open
 	noteSize fyne.Size
