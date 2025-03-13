@@ -132,7 +132,7 @@ func CreateTopPanel()(*fyne.Container){
 	)
 
 	AppWidgets.toolbar = toolbar
-	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),toolbar, AppWidgets.pageLabel, layout.NewSpacer() )
+	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),toolbar, AppWidgets.pageLabel, layout.NewSpacer(),layout.NewSpacer() )
 
 	return topPanel
 }
@@ -145,6 +145,10 @@ func CreateSidePanel()(*fyne.Container){
 			listPanel.Hide()
 		}
 		OpenNoteWindow(0) //new note has id=0
+	})
+
+	searchBtn := widget.NewButtonWithIcon("",theme.SearchIcon(), func(){
+
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
@@ -200,7 +204,7 @@ func CreateSidePanel()(*fyne.Container){
 
 	spacerLabel := widget.NewLabel(" ")
 
-	btnPanel := container.NewVBox(newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
+	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	listPanel = container.NewStack(AppWidgets.notebooksList)
 	listPanel.Hide()
 
