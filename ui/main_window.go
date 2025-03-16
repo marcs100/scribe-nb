@@ -9,11 +9,12 @@ import (
 	"scribe-nb/scribedb"
 	"slices"
 
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	//"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -41,7 +42,7 @@ func CreateMainWindow(){
 
 	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth,Conf.AppSettings.NoteHeight)
 
-	mainWindow := mainApp.NewWindow("Scribe-NB")
+	mainWindow = mainApp.NewWindow("Scribe-NB")
 
 	//Main Grid container for displaying notes
 	grid := container.NewGridWrap(AppStatus.noteSize)
@@ -139,6 +140,9 @@ func CreateTopPanel()(*fyne.Container){
 
 func CreateSidePanel()(*fyne.Container){
 	var listPanel *fyne.Container
+	var searchPanel *fyne.Container
+
+	searchPanel = CreateSearchPanel()
 
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func(){
 		if listPanel != nil{
@@ -148,7 +152,12 @@ func CreateSidePanel()(*fyne.Container){
 	})
 
 	searchBtn := widget.NewButtonWithIcon("",theme.SearchIcon(), func(){
-
+		//Display the search panel here
+		if searchPanel.Hidden{
+			searchPanel.Show()
+		}else{
+			searchPanel.Hide()
+		}
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
@@ -207,11 +216,20 @@ func CreateSidePanel()(*fyne.Container){
 	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	listPanel = container.NewStack(AppWidgets.notebooksList)
 	listPanel.Hide()
+	searchPanel.Hide()
 
 
-	sideContainer := container.NewHBox(btnPanel,listPanel)
+	sideContainer := container.NewHBox(btnPanel,listPanel, searchPanel)
 
 	return sideContainer
+}
+
+func CreateSearchPanel()*fyne.Container{
+
+	searchLabel := widget.NewLabel("Search:  ")
+	searchEntry := widget.NewEntry()
+	searchPanel := container.NewVBox(searchLabel,searchEntry)
+	return searchPanel
 }
 
 

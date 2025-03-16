@@ -12,11 +12,13 @@ const VIEW_TAGS string = "tag"
 const LAYOUT_GRID = "grid"
 const LAYOUT_PAGE = "page"
 
+
 var AppContainers ApplicationContainers //structure containing pointers to fyne containers
 var AppWidgets ApplicationWidgets //structure containing pointers to fyne widgets
 var PageView PageViewStatus // structure to track page numbers
 var AppStatus ApplicationStatus // structure containing various app status
 var Conf *config.Config
 var mainApp fyne.App
+var mainWindow fyne.Window
 
 
