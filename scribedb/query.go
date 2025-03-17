@@ -56,6 +56,10 @@ func GetNotebookCovers()([]string,error){
 	return getColumn(query)
 }
 
+func GetSearchResults(searchQuery string)([]NoteData, error){
+	return getSearchResults(searchQuery)
+}
+
 
 //************ Private functions ************************
 
@@ -89,6 +93,35 @@ func getNotes(query string)([]NoteData, error){
 	}
 
 	rows, err := db.Query(query)
+	var notes []NoteData
+	defer rows.Close()
+	for rows.Next(){
+		var note NoteData
+		err := rows.Scan(&note.Id, &note.Notebook, &note.Content, &note.Created, &note.Modified, &note.Pinned, &note.BackgroundColour)
+
+		if err != nil{
+			return nil, err
+		}
+
+		notes = append(notes, note)
+	}
+
+	//fmt.Println(notes[1].content)
+	//fmt.Println(notes[2].content)
+	//fmt.Println(notes[3].content)
+
+	return notes, err
+}
+
+
+func getSearchResults(searchText string)([]NoteData, error){
+	if !connected{
+		return nil, errors.New("Get Notes: database not connected")
+	}
+
+	searchText = "%" + searchText + "%"
+
+	rows, err := db.Query("select * from notes where content like ? order by modified desc", searchText)
 	var notes []NoteData
 	defer rows.Close()
 	for rows.Next(){

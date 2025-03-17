@@ -8,6 +8,7 @@ import (
 const VIEW_PINNED string = "pinned"
 const VIEW_RECENT string = "recent"
 const VIEW_NOTEBOOK string = "notebooks"
+const VIEW_SEARCH string = "search"
 const VIEW_TAGS string = "tag"
 const LAYOUT_GRID = "grid"
 const LAYOUT_PAGE = "page"

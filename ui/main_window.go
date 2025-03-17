@@ -155,6 +155,7 @@ func CreateSidePanel()(*fyne.Container){
 		//Display the search panel here
 		if searchPanel.Hidden{
 			searchPanel.Show()
+			mainWindow.Canvas().Focus(AppWidgets.searchEntry)
 		}else{
 			searchPanel.Hide()
 		}
@@ -166,15 +167,15 @@ func CreateSidePanel()(*fyne.Container){
 			listPanel.Hide()
 		}
 		var err error
-		AppStatus.notes,err = scribedb.GetPinnedNotes()
+		//AppStatus.notes,err = scribedb.GetPinnedNotes()
+		AppStatus.currentView = VIEW_PINNED
+		//ShowNotesInGrid(notes,noteSize)
+		PageView.Reset()
+		err = UpdateView()
 		if err != nil{
 			log.Print("Error getting pinned notes: ")
 			log.Panic(err)
 		}
-		AppStatus.currentView = VIEW_PINNED
-		//ShowNotesInGrid(notes,noteSize)
-		PageView.Reset()
-		UpdateView()
 	})
 
 	RecentBtn := widget.NewButtonWithIcon("Recent",theme.HistoryIcon() ,func(){
@@ -182,14 +183,14 @@ func CreateSidePanel()(*fyne.Container){
 			listPanel.Hide()
 		}
 		var err error
-		AppStatus.notes,err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+		AppStatus.currentView = VIEW_RECENT
+		PageView.Reset()
+		err = UpdateView()
 		if err != nil{
 			log.Print("Error getting recent notes: ")
 			log.Panic(err)
 		}
-		AppStatus.currentView = VIEW_RECENT
-		PageView.Reset()
-		UpdateView()
 	})
 
 	CreateNotebooksList()
@@ -226,9 +227,33 @@ func CreateSidePanel()(*fyne.Container){
 
 func CreateSearchPanel()*fyne.Container{
 
-	searchLabel := widget.NewLabel("Search:  ")
-	searchEntry := widget.NewEntry()
-	searchPanel := container.NewVBox(searchLabel,searchEntry)
+	filterLabel := widget.NewLabel("Filter: -")
+	searchFilter := widget.NewRadioGroup([]string{"All", "Current Notebook", "Pinned", "Recent"}, func(value string){
+		switch value{
+			case "All":
+
+			case "Current notebook":
+
+			case "Pinned":
+
+			case "Recent":
+
+		}
+	})
+	searchFilter.SetSelected("All")
+
+	searchLabel := widget.NewLabel("               Search:               ")
+	AppWidgets.searchEntry = widget.NewEntry()
+	AppWidgets.searchEntry.OnSubmitted = func(text string){
+		AppStatus.currentView = VIEW_SEARCH
+		var err error = UpdateView()
+		if err != nil{
+			log.Print("Error getting search results: ")
+			log.Panic(err)
+		}
+
+	}
+	searchPanel := container.NewVBox(searchLabel,AppWidgets.searchEntry, filterLabel, searchFilter)
 	return searchPanel
 }
 
@@ -352,12 +377,20 @@ func UpdateView()error{
 		case VIEW_PINNED:
 			AppWidgets.viewLabel.SetText("Pinned Notes")
 			AppStatus.notes, err = scribedb.GetPinnedNotes()
+			AppStatus.currentNotebook = ""
 		case VIEW_RECENT:
 			AppWidgets.viewLabel.SetText(("Recent Notes"))
 			AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+			AppStatus.currentNotebook = ""
 		case VIEW_NOTEBOOK:
 			AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
 			AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
+		case VIEW_SEARCH:
+			AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
+			if err == nil{
+				AppWidgets.viewLabel.SetText(fmt.Sprintf("Search Results (%d)", len(AppStatus.notes)))
+			}
+
 		default:
 			err = errors.New("undefined view")
 	}

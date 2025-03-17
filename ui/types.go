@@ -54,6 +54,7 @@ type ApplicationWidgets struct{
 	viewLabel *widget.Label
 	pageLabel *widget.Label
 	notebooksList *widget.List
+	searchEntry *widget.Entry
 }
 
 type ApplicationStatus struct{
