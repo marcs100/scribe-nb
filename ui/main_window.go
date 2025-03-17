@@ -352,7 +352,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 	themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
 	noteColour,_ := RGBStringToFyneColor(noteInfo.Colour)
 	noteBackground := canvas.NewRectangle(noteColour)
-	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF"{
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "ffffff"{
 		noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
 	}
 
