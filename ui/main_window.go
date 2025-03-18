@@ -204,10 +204,6 @@ func CreateSidePanel()(*fyne.Container){
 			}else{
 				listPanel.Show()
 			}
-
-			if AppContainers.grid != nil{
-				AppContainers.grid.RemoveAll()
-			}
 		}
 		PageView.Reset()
 	})
