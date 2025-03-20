@@ -17,10 +17,10 @@ func main() {
 
 	if runtime.GOOS == "windows"{
 		//This needs to be improved but will do for now!!!!
-		confFile = "C:\\users\\marks\\scribe-nb\\config.toml"
+		confFile = "C:\\users\\vboxuser\\scribe-nb\\config.toml"
 	}else{
-		confFile = "/home/marc/.config/scribe-nb/config_dev.toml" // development only
-		//conf_file := "/home/marc/.config/scribe-nb/config.toml" //release version
+		//confFile = "/home/marc/.config/scribe-nb/config_dev.toml" // development only
+		confFile = "/home/marc/.config/scribe-nb/config.toml" //release version
 	}
 	appConfig,err = config.GetConfig(confFile)
 	if err != nil{
@@ -28,7 +28,7 @@ func main() {
 		return
 	}
 
-	err = scribedb.Open()
+	err = scribedb.Open(appConfig.AppSettings.Database)
 	defer scribedb.Close()
 	if err != nil{
 		log.Panicln(err)

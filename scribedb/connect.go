@@ -9,9 +9,9 @@ import(
 var connected = false
 var db *sql.DB = nil
 
-func Open() (error){
+func Open(dbFile string) (error){
 	var err error
-	db, err = sql.Open("sqlite3", "/home/marc/sync/scribe/scribeNB.db")
+	db, err = sql.Open("sqlite3", dbFile)
 
 	if err != nil {
 		log.Fatal(err)
