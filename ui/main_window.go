@@ -19,13 +19,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func StartUI(appConfigIn *config.Config){
+func StartUI(appConfigIn *config.Config, version string){
 	Conf = appConfigIn
 	mainApp = app.NewWithID("scribe-nb")
-	CreateMainWindow()
+	CreateMainWindow(version)
 }
 
-func CreateMainWindow(){
+func CreateMainWindow(version string){
 
 	modDarkColour,_ := RGBStringToFyneColor("#2f2f2f")
 	modLightColour,_ := RGBStringToFyneColor("#e2e2e2")
@@ -42,7 +42,7 @@ func CreateMainWindow(){
 
 	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth,Conf.AppSettings.NoteHeight)
 
-	mainWindow = mainApp.NewWindow("Scribe-NB")
+	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 
 	//Main Grid container for displaying notes
 	grid := container.NewGridWrap(AppStatus.noteSize)
