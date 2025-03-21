@@ -14,7 +14,7 @@ func Open(dbFile string) (error){
 	db, err = sql.Open("sqlite3", dbFile)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Panicln(err)
 		connected = false
 	}else{
 		log.Println("data base open success")
@@ -22,7 +22,6 @@ func Open(dbFile string) (error){
 	}
 
 	return err
-	//defer db.Close()
 }
 
 func Close(){
