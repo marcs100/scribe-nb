@@ -15,4 +15,5 @@ type Settings struct{
 	NoteHeight float32 `toml:"note_height"`
 	InitialView string `toml:"initial_view"`
 	InitialLayout string `toml:"initial_layout"`
+	GridMaxPages int `toml:"grid_max_pages"`
 }

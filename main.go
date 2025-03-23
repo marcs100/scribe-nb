@@ -11,7 +11,7 @@ import (
 	"scribe-nb/ui"
 )
 
-const VERSION = "0.2"
+const VERSION = "0.3"
 
 func main() {
 	var err error
@@ -85,6 +85,7 @@ func CreateAppConfig(homeDir string)config.Config{
 		NoteHeight: 350,
 		NoteWidth: 600,
 		RecentNotesLimit: 8,
+		GridMaxPages: 100,
 	}
 	newConfig := config.Config{
 		Title: fmt.Sprintf("Scribe-nb v%s", VERSION),

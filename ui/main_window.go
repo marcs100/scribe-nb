@@ -423,13 +423,14 @@ func CreateNotebooksList(){
 			return len(AppStatus.notebooks)
 		},
 		func() fyne.CanvasObject{
-			return widget.NewButton("------------Notebooks------------", func(){})
+			return widget.NewButton("------------Notebooks (xx)------------", func(){})
 
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Button).SetText(AppStatus.notebooks[id])
+			AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
+			o.(*widget.Button).SetText(fmt.Sprintf("%s (%d)",AppStatus.notebooks[id], len(AppStatus.notes)))
 			o.(*widget.Button).OnTapped = func(){
-				AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
+				//AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
 				AppStatus.currentView = VIEW_NOTEBOOK
 				AppStatus.currentNotebook = AppStatus.notebooks[id]
 				PageView.Reset()
