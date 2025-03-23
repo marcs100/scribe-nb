@@ -78,7 +78,7 @@ func main() {
 
 func CreateAppConfig(homeDir string)config.Config{
 	appSettings := config.Settings{
-		Database: filepath.Join(homeDir,"ScribeNB","scribeNB.db"), //this one for release
+		Database: filepath.Join(homeDir,"scribe-nb","scribeNB.db"), //this one for release
 		//Database: filepath.Join(homeDir,"sync","scribe","scribeNB.db"), //temp one for dev
 		InitialLayout: "grid",
 		InitialView: "pinned",
