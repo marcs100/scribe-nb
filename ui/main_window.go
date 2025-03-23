@@ -106,12 +106,14 @@ func CreateTopPanel()(*fyne.Container){
 		widget.NewToolbarAction(theme.GridIcon(), func(){
 			if AppStatus.currentLayout != LAYOUT_GRID{
 				AppStatus.currentLayout = LAYOUT_GRID
+				PageView.Reset()
 				UpdateView()
 			}
 		}),
 		widget.NewToolbarAction(theme.FileIcon(), func(){
 			if AppStatus.currentLayout != LAYOUT_PAGE{
 				AppStatus.currentLayout = LAYOUT_PAGE
+				PageView.Reset()
 				UpdateView()
 			}
 		}),
@@ -268,23 +270,17 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 	}
 
 	AppContainers.grid.RemoveAll()
-	//for _, note := range notes{
-	fmt.Printf("current page = %d\n", PageView.CurrentPage)
-	numPages := (PageView.CurrentPage * PageView.Step) + PageView.Step
-	if numPages > PageView.NumberOfPages{
+	numPages := (PageView.CurrentPage + PageView.Step) -1
+	if numPages > len(notes){
 		numPages = PageView.NumberOfPages
 	}
 
 	if AppWidgets.pageLabel.Hidden != true{
-		AppWidgets.pageLabel.SetText(PageView.GetGridLabel())
+		AppWidgets.pageLabel.SetText(PageView.GetGridLabelText())
 	}
 
-	fmt.Printf("numPages = %d\n", numPages)
-	fmt.Printf("start index calc = %d\n", (PageView.CurrentPage-1) * PageView.Step)
-	for i := (PageView.CurrentPage-1) * PageView.Step; i< numPages; i++ {
-		fmt.Printf("index = %d\n", i)
+	for i := PageView.CurrentPage-1; i< numPages; i++ {
 		richText := NewScribeNoteText(notes[i].Content, func(){
-			//fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
 			if slices.Contains(AppStatus.openNotes, notes[i].Id){
 				//note is already open
 				fmt.Println("note is already open")
@@ -355,7 +351,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 	//calculate initial note content hash
 	//note.UpdateHash(&noteInfo)
 
-	AppWidgets.pageLabel.SetText(PageView.GetLabel())
+	AppWidgets.pageLabel.SetText(PageView.GetLabelText())
 	AppWidgets.pageLabel.Show()
 
 	AppWidgets.singleNotePage.ParseMarkdown(noteInfo.Content)

@@ -17,7 +17,7 @@ type PageViewStatus struct{
 }
 
 func (pv *PageViewStatus) PageForward() int{
-	if pv.CurrentPage < pv.NumberOfPages{
+	if pv.CurrentPage + pv.Step <= pv.NumberOfPages{
 		pv.CurrentPage += pv.Step
 		return pv.CurrentPage
 	}
@@ -38,12 +38,18 @@ func (pv *PageViewStatus) Reset(){
 	pv.Step=1
 }
 
-func (pv *PageViewStatus) GetLabel()string{
+func (pv *PageViewStatus) GetLabelText()string{
 	return fmt.Sprintf("Page: %d of %d",pv.CurrentPage,pv.NumberOfPages)
 }
 
-func (pv *PageViewStatus) GetGridLabel()string{
-	return fmt.Sprintf("Showing: %d to %d of %d",pv.CurrentPage, pv.CurrentPage + pv.Step, pv.NumberOfPages)
+func (pv *PageViewStatus) GetGridLabelText()string{
+	var pageRange int = 0
+	if ((pv.CurrentPage-1) + pv.Step) > pv.NumberOfPages{
+		pageRange = pv.NumberOfPages
+	}else{
+		pageRange = (pv.CurrentPage - 1)+ pv.Step
+	}
+	return fmt.Sprintf("Showing: %d to %d of %d",pv.CurrentPage, pageRange, pv.NumberOfPages)
 }
 
 
