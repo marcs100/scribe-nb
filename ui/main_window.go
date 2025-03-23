@@ -116,19 +116,17 @@ func CreateTopPanel()(*fyne.Container){
 			}
 		}),
 		widget.NewToolbarAction(theme.NavigateBackIcon(), func(){
-			if AppStatus.currentLayout == LAYOUT_PAGE{
-				if PageView.PageBack() > 0{
-					UpdateView()
-				}
+			if PageView.PageBack() > 0{
+				UpdateView()
 			}
+
 		}),
 		widget.NewToolbarAction(theme.NavigateNextIcon(), func(){
-			if AppStatus.currentLayout == LAYOUT_PAGE{
-				if PageView.PageForward() > 0{
-					UpdateView()
-				}
-
+			if PageView.PageForward() > 0{
+				UpdateView()
 			}
+
+
 		}),
 	)
 
@@ -263,25 +261,43 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 		AppContainers.mainPageContainer.Hide()
 	}
 
-	AppWidgets.pageLabel.Hide()
+	PageView.NumberOfPages = len(notes)
+	PageView.Step = Conf.AppSettings.GridMaxPages
+	if PageView.CurrentPage ==0{
+		PageView.CurrentPage = 1
+	}
 
 	AppContainers.grid.RemoveAll()
-	for _, note := range notes{
-		richText := NewScribeNoteText(note.Content, func(){
+	//for _, note := range notes{
+	fmt.Printf("current page = %d\n", PageView.CurrentPage)
+	numPages := (PageView.CurrentPage * PageView.Step) + PageView.Step
+	if numPages > PageView.NumberOfPages{
+		numPages = PageView.NumberOfPages
+	}
+
+	if AppWidgets.pageLabel.Hidden != true{
+		AppWidgets.pageLabel.SetText(PageView.GetGridLabel())
+	}
+
+	fmt.Printf("numPages = %d\n", numPages)
+	fmt.Printf("start index calc = %d\n", (PageView.CurrentPage-1) * PageView.Step)
+	for i := (PageView.CurrentPage-1) * PageView.Step; i< numPages; i++ {
+		fmt.Printf("index = %d\n", i)
+		richText := NewScribeNoteText(notes[i].Content, func(){
 			//fmt.Println("You clciked note with id ... " + fmt.Sprintf("%d", note.Id))
-			if slices.Contains(AppStatus.openNotes, note.Id){
+			if slices.Contains(AppStatus.openNotes, notes[i].Id){
 				//note is already open
 				fmt.Println("note is already open")
 			}else{
-				AppStatus.openNotes = append(AppStatus.openNotes, note.Id)
-				OpenNoteWindow(note.Id)
+				AppStatus.openNotes = append(AppStatus.openNotes, notes[i].Id)
+				OpenNoteWindow(notes[i].Id)
 			}
 		})
 		richText.Wrapping = fyne.TextWrapWord
 		themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
-		noteColour,_ := RGBStringToFyneColor(note.BackgroundColour)
+		noteColour,_ := RGBStringToFyneColor(notes[i].BackgroundColour)
 		noteBackground := canvas.NewRectangle(noteColour)
-		if note.BackgroundColour == "#e7edef" || note.BackgroundColour == "#FFFFFF"{
+		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF"{
 			noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
 		}
 
@@ -302,6 +318,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 	}
 
 	PageView.NumberOfPages = len(notes)
+	PageView.Step = 1
 	if PageView.CurrentPage ==0{
 		PageView.CurrentPage = 1
 	}
@@ -397,8 +414,15 @@ func UpdateView()error{
 
 	switch AppStatus.currentLayout{
 		case LAYOUT_GRID:
-			AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
-			AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
+			if len(AppStatus.notes) <= Conf.AppSettings.GridMaxPages{
+				AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
+				AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
+				AppWidgets.pageLabel.Hide()
+			}else{
+				AppWidgets.toolbar.Items[2].ToolbarObject().Show()
+				AppWidgets.toolbar.Items[3].ToolbarObject().Show()
+				AppWidgets.pageLabel.Show()
+			}
 			ShowNotesInGrid(AppStatus.notes, AppStatus.noteSize)
 		case LAYOUT_PAGE:
 			AppWidgets.toolbar.Items[2].ToolbarObject().Show()
