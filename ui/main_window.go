@@ -19,28 +19,17 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func StartUI(appConfigIn *config.Config, version string){
+func StartUI(appConfigIn *config.Config, version string) {
 	Conf = appConfigIn
 	mainApp = app.NewWithID("scribe-nb")
 	CreateMainWindow(version)
 }
 
-func CreateMainWindow(version string){
+func CreateMainWindow(version string) {
 
-	modDarkColour,_ := RGBStringToFyneColor("#2f2f2f")
-	modLightColour,_ := RGBStringToFyneColor("#e2e2e2")
+	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth, Conf.AppSettings.NoteHeight)
 
-	themeVariant := mainApp.Settings().ThemeVariant()
-	themeBgColour := mainApp.Settings().Theme().Color(theme.ColorNameBackground,themeVariant)
-	AppStatus.themeBgColour = themeBgColour
-	if themeVariant == theme.VariantDark{
-		AppStatus.themeBgColour = modDarkColour
-	}else if themeVariant == theme.VariantLight{
-		AppStatus.themeBgColour = modLightColour
-	}
-
-
-	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth,Conf.AppSettings.NoteHeight)
+	AppStatus.themeBgColour = GetThemeColour()
 
 	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 
@@ -67,103 +56,99 @@ func CreateMainWindow(version string){
 	appContainer := container.NewBorder(top, nil, side, nil, main)
 
 	mainWindow.SetContent(appContainer)
-	mainWindow.Resize(fyne.NewSize(2000,1200))
+	mainWindow.Resize(fyne.NewSize(2000, 1200))
 
 	//set default view and layout`
 	AppStatus.currentView = Conf.AppSettings.InitialView
-	fmt.Println("initial view = "+ Conf.AppSettings.InitialView)
+	fmt.Println("initial view = " + Conf.AppSettings.InitialView)
 	AppStatus.currentLayout = Conf.AppSettings.InitialLayout
 
-	if err := UpdateView(); err != nil{
+	if err := UpdateView(); err != nil {
 		fmt.Println(err)
 	}
 
 	mainWindow.ShowAndRun()
 }
 
-
-func CreateMainPanel()(*fyne.Container){
+func CreateMainPanel() *fyne.Container {
 
 	mainGridContainer := container.NewScroll(AppContainers.grid)
 	AppContainers.mainGridContainer = mainGridContainer
 	mainPageContainer := container.NewScroll(AppContainers.singleNoteStack)
 	AppContainers.mainPageContainer = mainPageContainer
-	mainStackedContainer := container.NewStack(mainPageContainer,mainGridContainer )
+	mainStackedContainer := container.NewStack(mainPageContainer, mainGridContainer)
 
 	return mainStackedContainer
 }
 
-func CreateTopPanel()(*fyne.Container){
+func CreateTopPanel() *fyne.Container {
 	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	spacerLabel := widget.NewLabel("                                ")
-
-
 
 	AppWidgets.pageLabel = widget.NewLabel("Page: ")
 	AppWidgets.pageLabel.Hide()
 
-	toolbar  := widget.NewToolbar(
-		widget.NewToolbarAction(theme.GridIcon(), func(){
-			if AppStatus.currentLayout != LAYOUT_GRID{
+	toolbar := widget.NewToolbar(
+		widget.NewToolbarAction(theme.GridIcon(), func() {
+			if AppStatus.currentLayout != LAYOUT_GRID {
 				AppStatus.currentLayout = LAYOUT_GRID
 				PageView.Reset()
 				UpdateView()
 			}
 		}),
-		widget.NewToolbarAction(theme.FileIcon(), func(){
-			if AppStatus.currentLayout != LAYOUT_PAGE{
+		widget.NewToolbarAction(theme.FileIcon(), func() {
+			if AppStatus.currentLayout != LAYOUT_PAGE {
 				AppStatus.currentLayout = LAYOUT_PAGE
 				PageView.Reset()
 				UpdateView()
 			}
 		}),
-		widget.NewToolbarAction(theme.NavigateBackIcon(), func(){
-			if PageView.PageBack() > 0{
+		widget.NewToolbarAction(theme.NavigateBackIcon(), func() {
+			if PageView.PageBack() > 0 {
 				UpdateView()
 			}
 
 		}),
-		widget.NewToolbarAction(theme.NavigateNextIcon(), func(){
-			if PageView.PageForward() > 0{
+		widget.NewToolbarAction(theme.NavigateNextIcon(), func() {
+			if PageView.PageForward() > 0 {
 				UpdateView()
 			}
-
 
 		}),
 	)
 
 	AppWidgets.toolbar = toolbar
-	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),toolbar, AppWidgets.pageLabel, layout.NewSpacer(),layout.NewSpacer() )
+	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(), layout.NewSpacer())
 
 	return topPanel
 }
 
-func CreateSidePanel()(*fyne.Container){
+func CreateSidePanel() *fyne.Container {
 	var listPanel *fyne.Container
 	var searchPanel *fyne.Container
 
 	searchPanel = CreateSearchPanel()
 
-	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func(){
-		if listPanel != nil{
+	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func() {
+		if listPanel != nil {
 			listPanel.Hide()
 		}
 		OpenNoteWindow(0) //new note has id=0
 	})
 
-	searchBtn := widget.NewButtonWithIcon("",theme.SearchIcon(), func(){
+	searchBtn := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
 		//Display the search panel here
-		if searchPanel.Hidden{
+		if searchPanel.Hidden {
 			searchPanel.Show()
 			mainWindow.Canvas().Focus(AppWidgets.searchEntry)
-		}else{
+		} else {
 			searchPanel.Hide()
 		}
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
-	pinnedBtn := widget.NewButtonWithIcon("Pinned",theme.RadioButtonCheckedIcon() ,func(){
-		if listPanel != nil{
+	pinnedBtn := widget.NewButtonWithIcon("Pinned", theme.RadioButtonCheckedIcon(), func() {
+		if listPanel != nil {
 			listPanel.Hide()
 		}
 		var err error
@@ -172,14 +157,14 @@ func CreateSidePanel()(*fyne.Container){
 		//ShowNotesInGrid(notes,noteSize)
 		PageView.Reset()
 		err = UpdateView()
-		if err != nil{
+		if err != nil {
 			log.Print("Error getting pinned notes: ")
 			log.Panic(err)
 		}
 	})
 
-	RecentBtn := widget.NewButtonWithIcon("Recent",theme.HistoryIcon() ,func(){
-		if listPanel != nil{
+	RecentBtn := widget.NewButtonWithIcon("Recent", theme.HistoryIcon(), func() {
+		if listPanel != nil {
 			listPanel.Hide()
 		}
 		var err error
@@ -187,7 +172,7 @@ func CreateSidePanel()(*fyne.Container){
 		AppStatus.currentView = VIEW_RECENT
 		PageView.Reset()
 		err = UpdateView()
-		if err != nil{
+		if err != nil {
 			log.Print("Error getting recent notes: ")
 			log.Panic(err)
 		}
@@ -195,13 +180,13 @@ func CreateSidePanel()(*fyne.Container){
 
 	CreateNotebooksList()
 
-	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func(){
+	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func() {
 		AppWidgets.viewLabel.SetText("Notebooks")
 		UpdateNotebooksList()
-		if listPanel != nil{
-			if listPanel.Visible(){
+		if listPanel != nil {
+			if listPanel.Visible() {
 				listPanel.Hide()
-			}else{
+			} else {
 				listPanel.Show()
 			}
 		}
@@ -215,24 +200,23 @@ func CreateSidePanel()(*fyne.Container){
 	listPanel.Hide()
 	searchPanel.Hide()
 
-
-	sideContainer := container.NewHBox(btnPanel,listPanel, searchPanel)
+	sideContainer := container.NewHBox(btnPanel, listPanel, searchPanel)
 
 	return sideContainer
 }
 
-func CreateSearchPanel()*fyne.Container{
+func CreateSearchPanel() *fyne.Container {
 
 	filterLabel := widget.NewLabel("Filter: -")
-	searchFilter := widget.NewRadioGroup([]string{"All", "Current Notebook", "Pinned", "Recent"}, func(value string){
-		switch value{
-			case "All":
+	searchFilter := widget.NewRadioGroup([]string{"All", "Current Notebook", "Pinned", "Recent"}, func(value string) {
+		switch value {
+		case "All":
 
-			case "Current notebook":
+		case "Current notebook":
 
-			case "Pinned":
+		case "Pinned":
 
-			case "Recent":
+		case "Recent":
 
 		}
 	})
@@ -240,66 +224,65 @@ func CreateSearchPanel()*fyne.Container{
 
 	searchLabel := widget.NewLabel("               Search:               ")
 	AppWidgets.searchEntry = widget.NewEntry()
-	AppWidgets.searchEntry.OnSubmitted = func(text string){
+	AppWidgets.searchEntry.OnSubmitted = func(text string) {
 		AppStatus.currentView = VIEW_SEARCH
 		var err error = UpdateView()
-		if err != nil{
+		if err != nil {
 			log.Print("Error getting search results: ")
 			log.Panic(err)
 		}
 
 	}
-	searchPanel := container.NewVBox(searchLabel,AppWidgets.searchEntry, filterLabel, searchFilter)
+	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, filterLabel, searchFilter)
 	return searchPanel
 }
 
-
-func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
-	if AppContainers.grid == nil || AppContainers.mainGridContainer == nil{
+func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
+	if AppContainers.grid == nil || AppContainers.mainGridContainer == nil {
 		return
 	}
 
-	if AppContainers.mainPageContainer != nil{
+	if AppContainers.mainPageContainer != nil {
 		AppContainers.mainPageContainer.Hide()
 	}
 
 	PageView.NumberOfPages = len(notes)
 	PageView.Step = Conf.AppSettings.GridMaxPages
-	if PageView.CurrentPage ==0{
+	if PageView.CurrentPage == 0 {
 		PageView.CurrentPage = 1
 	}
 
 	AppContainers.grid.RemoveAll()
-	numPages := (PageView.CurrentPage + PageView.Step) -1
-	if numPages > len(notes){
+	numPages := (PageView.CurrentPage + PageView.Step) - 1
+	if numPages > len(notes) {
 		numPages = PageView.NumberOfPages
 	}
 
-	if AppWidgets.pageLabel.Hidden != true{
+	if AppWidgets.pageLabel.Hidden != true {
 		AppWidgets.pageLabel.SetText(PageView.GetGridLabelText())
 	}
 
-	for i := PageView.CurrentPage-1; i< numPages; i++ {
-		richText := NewScribeNoteText(notes[i].Content, func(){
-			if slices.Contains(AppStatus.openNotes, notes[i].Id){
+	for i := PageView.CurrentPage - 1; i < numPages; i++ {
+		richText := NewScribeNoteText(notes[i].Content, func() {
+			if slices.Contains(AppStatus.openNotes, notes[i].Id) {
 				//note is already open
 				fmt.Println("note is already open")
-			}else{
+			} else {
 				AppStatus.openNotes = append(AppStatus.openNotes, notes[i].Id)
 				OpenNoteWindow(notes[i].Id)
 			}
 		})
 		richText.Wrapping = fyne.TextWrapWord
 		themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
-		noteColour,_ := RGBStringToFyneColor(notes[i].BackgroundColour)
+		noteColour, _ := RGBStringToFyneColor(notes[i].BackgroundColour)
 		noteBackground := canvas.NewRectangle(noteColour)
-		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF"{
+		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF" {
 			noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
 		}
 
 		colourStack := container.NewStack(noteBackground)
 		textPadded := container.NewPadded(themeBackground, richText)
-		noteStack:= container.NewStack(colourStack, textPadded)
+		noteStack := container.NewStack(colourStack, textPadded)
 
 		//borderLayout := container.NewBorder(noteBackground,noteBackground,noteBackground, noteBackground,textStack)
 		AppContainers.grid.Add(noteStack)
@@ -308,32 +291,32 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size){
 	AppContainers.mainGridContainer.Show()
 }
 
-func ShowNotesAsPages(notes []scribedb.NoteData){
-	if AppContainers.mainGridContainer != nil{
+func ShowNotesAsPages(notes []scribedb.NoteData) {
+	if AppContainers.mainGridContainer != nil {
 		AppContainers.mainGridContainer.Hide()
 	}
 
 	PageView.NumberOfPages = len(notes)
 	PageView.Step = 1
-	if PageView.CurrentPage ==0{
+	if PageView.CurrentPage == 0 {
 		PageView.CurrentPage = 1
 	}
 
 	retreievdNote, err := scribedb.GetNote(notes[PageView.CurrentPage-1].Id)
 
-	if err != nil{
+	if err != nil {
 		log.Println("error getting note")
 		log.Panic(err)
 	}
 
 	noteInfo := note.NoteInfo{
-		Id: retreievdNote.Id,
-		Notebook: retreievdNote.Notebook,
-		DateCreated: retreievdNote.Created,
+		Id:           retreievdNote.Id,
+		Notebook:     retreievdNote.Notebook,
+		DateCreated:  retreievdNote.Created,
 		DateModified: retreievdNote.Modified,
-		Colour: retreievdNote.BackgroundColour,
-		Content: retreievdNote.Content,
-		Deleted: false,
+		Colour:       retreievdNote.BackgroundColour,
+		Content:      retreievdNote.Content,
+		Deleted:      false,
 	}
 
 	/*if noteInfo.Id != 0{
@@ -359,15 +342,15 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 	AppWidgets.singleNotePage.Refresh()
 
 	themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
-	noteColour,_ := RGBStringToFyneColor(noteInfo.Colour)
+	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
 	noteBackground := canvas.NewRectangle(noteColour)
-	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "ffffff"{
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "ffffff" {
 		noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
 	}
 
 	colourStack := container.NewStack(noteBackground)
 	textPadded := container.NewPadded(themeBackground, AppWidgets.singleNotePage)
-	noteStack:= container.NewStack(colourStack, textPadded)
+	noteStack := container.NewStack(colourStack, textPadded)
 
 	AppContainers.singleNoteStack.RemoveAll()
 	AppContainers.singleNoteStack.Add(noteStack)
@@ -377,79 +360,78 @@ func ShowNotesAsPages(notes []scribedb.NoteData){
 
 }
 
-
-func UpdateView()error{
+func UpdateView() error {
 	//var notes []scribedb.NoteData
 	var err error
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
-	switch AppStatus.currentView{
-		case VIEW_PINNED:
-			AppWidgets.viewLabel.SetText("Pinned Notes")
-			AppStatus.notes, err = scribedb.GetPinnedNotes()
-			AppStatus.currentNotebook = ""
-		case VIEW_RECENT:
-			AppWidgets.viewLabel.SetText(("Recent Notes"))
-			AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
-			AppStatus.currentNotebook = ""
-		case VIEW_NOTEBOOK:
-			AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
-			AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
-		case VIEW_SEARCH:
-			AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
-			if err == nil{
-				AppWidgets.viewLabel.SetText(fmt.Sprintf("Search Results (%d)", len(AppStatus.notes)))
-			}
+	switch AppStatus.currentView {
+	case VIEW_PINNED:
+		AppWidgets.viewLabel.SetText("Pinned Notes")
+		AppStatus.notes, err = scribedb.GetPinnedNotes()
+		AppStatus.currentNotebook = ""
+	case VIEW_RECENT:
+		AppWidgets.viewLabel.SetText(("Recent Notes"))
+		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+		AppStatus.currentNotebook = ""
+	case VIEW_NOTEBOOK:
+		AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
+		AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
+	case VIEW_SEARCH:
+		AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
+		if err == nil {
+			AppWidgets.viewLabel.SetText(fmt.Sprintf("Search Results (%d)", len(AppStatus.notes)))
+		}
 
-		default:
-			err = errors.New("undefined view")
+	default:
+		err = errors.New("undefined view")
 	}
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
-	switch AppStatus.currentLayout{
-		case LAYOUT_GRID:
-			if len(AppStatus.notes) <= Conf.AppSettings.GridMaxPages{
-				AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
-				AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
-				AppWidgets.pageLabel.Hide()
-			}else{
-				AppWidgets.toolbar.Items[2].ToolbarObject().Show()
-				AppWidgets.toolbar.Items[3].ToolbarObject().Show()
-				AppWidgets.pageLabel.Show()
-			}
-			ShowNotesInGrid(AppStatus.notes, AppStatus.noteSize)
-		case LAYOUT_PAGE:
+	switch AppStatus.currentLayout {
+	case LAYOUT_GRID:
+		if len(AppStatus.notes) <= Conf.AppSettings.GridMaxPages {
+			AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
+			AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
+			AppWidgets.pageLabel.Hide()
+		} else {
 			AppWidgets.toolbar.Items[2].ToolbarObject().Show()
 			AppWidgets.toolbar.Items[3].ToolbarObject().Show()
-			ShowNotesAsPages(AppStatus.notes)
-		default:
-			err = errors.New("undefined layout")
+			AppWidgets.pageLabel.Show()
+		}
+		ShowNotesInGrid(AppStatus.notes, AppStatus.noteSize)
+	case LAYOUT_PAGE:
+		AppWidgets.toolbar.Items[2].ToolbarObject().Show()
+		AppWidgets.toolbar.Items[3].ToolbarObject().Show()
+		ShowNotesAsPages(AppStatus.notes)
+	default:
+		err = errors.New("undefined layout")
 	}
 
 	return err
 }
 
-func CreateNotebooksList(){
+func CreateNotebooksList() {
 	var err error
-	AppStatus.notebooks,err = scribedb.GetNotebooks()
-	if err != nil{
+	AppStatus.notebooks, err = scribedb.GetNotebooks()
+	if err != nil {
 		log.Print("Error getting Notebooks: ")
 		log.Panic(err)
 	}
 	AppWidgets.notebooksList = widget.NewList(
-		func()int {
+		func() int {
 			return len(AppStatus.notebooks)
 		},
-		func() fyne.CanvasObject{
-			return widget.NewButton("------------Notebooks (xx)------------", func(){})
+		func() fyne.CanvasObject {
+			return widget.NewButton("------------Notebooks (xx)------------", func() {})
 
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
-			AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
-			o.(*widget.Button).SetText(fmt.Sprintf("%s (%d)",AppStatus.notebooks[id], len(AppStatus.notes)))
-			o.(*widget.Button).OnTapped = func(){
+			AppStatus.notes, _ = scribedb.GetNotebook(AppStatus.notebooks[id])
+			o.(*widget.Button).SetText(fmt.Sprintf("%s (%d)", AppStatus.notebooks[id], len(AppStatus.notes)))
+			o.(*widget.Button).OnTapped = func() {
 				//AppStatus.notes,_ = scribedb.GetNotebook(AppStatus.notebooks[id])
 				AppStatus.currentView = VIEW_NOTEBOOK
 				AppStatus.currentNotebook = AppStatus.notebooks[id]
@@ -461,10 +443,10 @@ func CreateNotebooksList(){
 
 }
 
-func UpdateNotebooksList(){
+func UpdateNotebooksList() {
 	var err error
-	AppStatus.notebooks,err = scribedb.GetNotebooks()
-	if err != nil{
+	AppStatus.notebooks, err = scribedb.GetNotebooks()
+	if err != nil {
 		log.Print("Error getting Notebooks: ")
 		log.Panic(err)
 	}

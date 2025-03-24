@@ -21,46 +21,46 @@ func main() {
 	var confFilePath string
 	var homeDir string
 
-	if homeDir,dir_err = os.UserHomeDir(); dir_err != nil{
+	if homeDir, dir_err = os.UserHomeDir(); dir_err != nil {
 		log.Panicln(dir_err)
 	}
 
-	if runtime.GOOS == "windows"{
+	if runtime.GOOS == "windows" {
 		//This needs to be improved but will do for now!!!!
-		confFilePath = filepath.Join(homeDir,"scribe-nb")
-	}else{
-		confFilePath = filepath.Join(homeDir,".config/scribe-nb") // development only
+		confFilePath = filepath.Join(homeDir, "scribe-nb")
+	} else {
+		confFilePath = filepath.Join(homeDir, ".config/scribe-nb") // development only
 	}
 
-	confFile := filepath.Join(confFilePath,confFileName)
+	confFile := filepath.Join(confFilePath, confFileName)
 
-	if _, f_err := os.Stat(confFile); f_err != nil{
+	if _, f_err := os.Stat(confFile); f_err != nil {
 		//write the default config confFile
-		if err = os.MkdirAll(confFilePath, os.ModePerm); err != nil{
+		if err = os.MkdirAll(confFilePath, os.ModePerm); err != nil {
 			log.Panicln("something went wrong with conf file path!!")
 		}
 
 		//create the default config.toml
 		newConfig := CreateAppConfig(homeDir)
 
-		if err = config.WriteConfig(confFile, newConfig); err != nil{
+		if err = config.WriteConfig(confFile, newConfig); err != nil {
 			log.Panicln(fmt.Sprintf("Error writing config file: %s", err))
 		}
 	}
 
-	appConfig,err = config.GetConfig(confFile)
-	if err != nil{
+	appConfig, err = config.GetConfig(confFile)
+	if err != nil {
 		log.Panicln(err)
 		return
 	}
 
 	//check if the database already exists
-	if _, dbf_err := os.Stat(appConfig.AppSettings.Database); dbf_err != nil{
+	if _, dbf_err := os.Stat(appConfig.AppSettings.Database); dbf_err != nil {
 		dbName := filepath.Base(appConfig.AppSettings.Database)
 		dbPath := filepath.Dir(appConfig.AppSettings.Database)
 
 		//create a new database
-		if err = scribedb.CreateNew(dbName, dbPath); err != nil{
+		if err = scribedb.CreateNew(dbName, dbPath); err != nil {
 			log.Panicln(fmt.Sprintf("Something went wrong creating new db: %s", err))
 		}
 		scribedb.Close()
@@ -68,27 +68,26 @@ func main() {
 
 	err = scribedb.Open(appConfig.AppSettings.Database)
 	defer scribedb.Close()
-	if err != nil{
+	if err != nil {
 		log.Panicln(err)
 	}
 
 	ui.StartUI(appConfig, VERSION)
 }
 
-
-func CreateAppConfig(homeDir string)config.Config{
+func CreateAppConfig(homeDir string) config.Config {
 	appSettings := config.Settings{
-		Database: filepath.Join(homeDir,"scribe-nb","scribeNB.db"), //this one for release
+		Database: filepath.Join(homeDir, "scribe-nb", "scribeNB.db"), //this one for release
 		//Database: filepath.Join(homeDir,"sync","scribe","scribeNB.db"), //temp one for dev
-		InitialLayout: "grid",
-		InitialView: "pinned",
-		NoteHeight: 350,
-		NoteWidth: 600,
+		InitialLayout:    "grid",
+		InitialView:      "pinned",
+		NoteHeight:       350,
+		NoteWidth:        600,
 		RecentNotesLimit: 8,
-		GridMaxPages: 100,
+		GridMaxPages:     100,
 	}
 	newConfig := config.Config{
-		Title: fmt.Sprintf("Scribe-nb v%s", VERSION),
+		Title:       fmt.Sprintf("Scribe-nb v%s", VERSION),
 		AppSettings: appSettings,
 	}
 
