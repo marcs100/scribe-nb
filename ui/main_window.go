@@ -82,8 +82,8 @@ func CreateMainPanel() *fyne.Container {
 }
 
 func CreateTopPanel() *fyne.Container {
-	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	spacerLabel := widget.NewLabel("                                ")
+	//AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	//spacerLabel := widget.NewLabel("                                ")
 
 	AppWidgets.pageLabel = widget.NewLabel("Page: ")
 	AppWidgets.pageLabel.Hide()
@@ -117,8 +117,16 @@ func CreateTopPanel() *fyne.Container {
 		}),
 	)
 
+	settingsBar := widget.NewToolbar(
+		widget.NewToolbarAction(theme.SettingsIcon(), func() {
+			fmt.Println("Setting pressed")
+
+		}),
+	)
+
 	AppWidgets.toolbar = toolbar
-	topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(), layout.NewSpacer())
+	//topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(),spacerLabel,spacerLabel, settingsBar)
+	topPanel := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(), settingsBar)
 
 	return topPanel
 }
@@ -126,6 +134,9 @@ func CreateTopPanel() *fyne.Container {
 func CreateSidePanel() *fyne.Container {
 	var listPanel *fyne.Container
 	var searchPanel *fyne.Container
+
+	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes      >", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+
 
 	searchPanel = CreateSearchPanel()
 
@@ -195,7 +206,7 @@ func CreateSidePanel() *fyne.Container {
 
 	spacerLabel := widget.NewLabel(" ")
 
-	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
+	btnPanel := container.NewVBox(AppWidgets.viewLabel, spacerLabel,searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	listPanel = container.NewStack(AppWidgets.notebooksList)
 	listPanel.Hide()
 	searchPanel.Hide()
@@ -207,6 +218,7 @@ func CreateSidePanel() *fyne.Container {
 
 func CreateSearchPanel() *fyne.Container {
 
+	AppWidgets.searchResultsLabel = widget.NewLabel("")
 	filterLabel := widget.NewLabel("Filter: -")
 	searchFilter := widget.NewRadioGroup([]string{"All", "Current Notebook", "Pinned", "Recent"}, func(value string) {
 		switch value {
@@ -233,7 +245,7 @@ func CreateSearchPanel() *fyne.Container {
 		}
 
 	}
-	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, filterLabel, searchFilter)
+	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
 	return searchPanel
 }
 
@@ -319,21 +331,6 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 		Deleted:      false,
 	}
 
-	/*if noteInfo.Id != 0{
-		noteInfo.NewNote = false
-	}else{
-		noteInfo.NewNote = true
-	}
-
-	if retreievdNote.Pinned > 0{
-		noteInfo.Pinned = true
-	} else {
-		noteInfo.Pinned = false
-	}*/
-
-	//calculate initial note content hash
-	//note.UpdateHash(&noteInfo)
-
 	AppWidgets.pageLabel.SetText(PageView.GetLabelText())
 	AppWidgets.pageLabel.Show()
 
@@ -366,11 +363,11 @@ func UpdateView() error {
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
 	switch AppStatus.currentView {
 	case VIEW_PINNED:
-		AppWidgets.viewLabel.SetText("Pinned Notes")
+		AppWidgets.viewLabel.SetText("Pinned Notes >")
 		AppStatus.notes, err = scribedb.GetPinnedNotes()
 		AppStatus.currentNotebook = ""
 	case VIEW_RECENT:
-		AppWidgets.viewLabel.SetText(("Recent Notes"))
+		AppWidgets.viewLabel.SetText(("Recent Notes >"))
 		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
 		AppStatus.currentNotebook = ""
 	case VIEW_NOTEBOOK:
@@ -379,7 +376,7 @@ func UpdateView() error {
 	case VIEW_SEARCH:
 		AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
 		if err == nil {
-			AppWidgets.viewLabel.SetText(fmt.Sprintf("Search Results (%d)", len(AppStatus.notes)))
+			AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) >", len(AppStatus.notes)))
 		}
 
 	default:
