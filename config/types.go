@@ -4,10 +4,10 @@ import ()
 
 type Config struct {
 	Title       string
-	AppSettings Settings `toml:"settings"`
+	Settings AppSettings `toml:"settings"`
 }
 
-type Settings struct {
+type AppSettings struct {
 	Database         string
 	RecentNotesLimit int     `toml:"recent_notes_limit"`
 	NoteWidth        float32 `toml:"note_width"`
@@ -15,5 +15,6 @@ type Settings struct {
 	InitialView      string  `toml:"initial_view"`
 	InitialLayout    string  `toml:"initial_layout"`
 	GridMaxPages     int     `toml:"grid_max_pages"`
-	Theme            string  `toml:"theme"`
+	DarkColour       string  `toml:"dark_colour"`
+	LightColour	 string  `toml:"light_colour"`
 }

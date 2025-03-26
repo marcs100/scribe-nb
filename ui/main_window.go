@@ -27,7 +27,7 @@ func StartUI(appConfigIn *config.Config, version string) {
 
 func CreateMainWindow(version string) {
 
-	AppStatus.noteSize = fyne.NewSize(Conf.AppSettings.NoteWidth, Conf.AppSettings.NoteHeight)
+	AppStatus.noteSize = fyne.NewSize(Conf.Settings.NoteWidth, Conf.Settings.NoteHeight)
 
 	AppStatus.themeBgColour = GetThemeColour()
 
@@ -59,9 +59,9 @@ func CreateMainWindow(version string) {
 	mainWindow.Resize(fyne.NewSize(2000, 1200))
 
 	//set default view and layout`
-	AppStatus.currentView = Conf.AppSettings.InitialView
-	fmt.Println("initial view = " + Conf.AppSettings.InitialView)
-	AppStatus.currentLayout = Conf.AppSettings.InitialLayout
+	AppStatus.currentView = Conf.Settings.InitialView
+	fmt.Println("initial view = " + Conf.Settings.InitialView)
+	AppStatus.currentLayout = Conf.Settings.InitialLayout
 
 	if err := UpdateView(); err != nil {
 		fmt.Println(err)
@@ -179,7 +179,7 @@ func CreateSidePanel() *fyne.Container {
 			listPanel.Hide()
 		}
 		var err error
-		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentView = VIEW_RECENT
 		PageView.Reset()
 		err = UpdateView()
@@ -192,8 +192,11 @@ func CreateSidePanel() *fyne.Container {
 	CreateNotebooksList()
 
 	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func() {
-		AppWidgets.viewLabel.SetText("Notebooks")
 		UpdateNotebooksList()
+		if AppStatus.currentView != VIEW_NOTEBOOK{
+			AppWidgets.viewLabel.SetText("Notebooks")
+		}
+
 		if listPanel != nil {
 			if listPanel.Visible() {
 				listPanel.Hide()
@@ -259,7 +262,7 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
 	}
 
 	PageView.NumberOfPages = len(notes)
-	PageView.Step = Conf.AppSettings.GridMaxPages
+	PageView.Step = Conf.Settings.GridMaxPages
 	if PageView.CurrentPage == 0 {
 		PageView.CurrentPage = 1
 	}
@@ -368,7 +371,7 @@ func UpdateView() error {
 		AppStatus.currentNotebook = ""
 	case VIEW_RECENT:
 		AppWidgets.viewLabel.SetText(("Recent Notes >"))
-		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.AppSettings.RecentNotesLimit)
+		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentNotebook = ""
 	case VIEW_NOTEBOOK:
 		AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
@@ -389,7 +392,7 @@ func UpdateView() error {
 
 	switch AppStatus.currentLayout {
 	case LAYOUT_GRID:
-		if len(AppStatus.notes) <= Conf.AppSettings.GridMaxPages {
+		if len(AppStatus.notes) <= Conf.Settings.GridMaxPages {
 			AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
 			AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
 			AppWidgets.pageLabel.Hide()

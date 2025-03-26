@@ -158,7 +158,7 @@ func OpenNoteWindow(noteId uint) {
 
 		//Add new notebook entry to menu
 		nbMenuItem := fyne.NewMenuItem("*New*",func(){
-			fmt.Println("Need to ask use for new notebook name here!!!!!!!!")
+			//fmt.Println("Need to ask use for new notebook name here!!!!!!!!")
 			notebookEntry := widget.NewEntry()
 			eNotebookEntry := widget.NewFormItem("Name", notebookEntry)
 			newNotebookDialog := dialog.NewForm("New Notebook?", "OK", "Cancel", []*widget.FormItem{eNotebookEntry}, func(confirmed bool) {

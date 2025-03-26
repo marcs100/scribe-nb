@@ -10,8 +10,8 @@ func GetThemeColour() color.Color {
 	var themeColour color.Color
 	themeVariant := mainApp.Settings().ThemeVariant()
 	themeColour = mainApp.Settings().Theme().Color(theme.ColorNameBackground, themeVariant)
-	modDarkColour, _ := RGBStringToFyneColor("#2f2f2f")
-	modLightColour, _ := RGBStringToFyneColor("#e2e2e2")
+	modDarkColour, _ := RGBStringToFyneColor(Conf.Settings.DarkColour)
+	modLightColour, _ := RGBStringToFyneColor(Conf.Settings.LightColour)
 	switch themeVariant {
 	case theme.VariantDark:
 		themeColour = modDarkColour

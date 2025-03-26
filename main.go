@@ -55,9 +55,9 @@ func main() {
 	}
 
 	//check if the database already exists
-	if _, dbf_err := os.Stat(appConfig.AppSettings.Database); dbf_err != nil {
-		dbName := filepath.Base(appConfig.AppSettings.Database)
-		dbPath := filepath.Dir(appConfig.AppSettings.Database)
+	if _, dbf_err := os.Stat(appConfig.Settings.Database); dbf_err != nil {
+		dbName := filepath.Base(appConfig.Settings.Database)
+		dbPath := filepath.Dir(appConfig.Settings.Database)
 
 		//create a new database
 		if err = scribedb.CreateNew(dbName, dbPath); err != nil {
@@ -66,7 +66,7 @@ func main() {
 		scribedb.Close()
 	}
 
-	err = scribedb.Open(appConfig.AppSettings.Database)
+	err = scribedb.Open(appConfig.Settings.Database)
 	defer scribedb.Close()
 	if err != nil {
 		log.Panicln(err)
@@ -76,19 +76,21 @@ func main() {
 }
 
 func CreateAppConfig(homeDir string) config.Config {
-	appSettings := config.Settings{
+	appSettings := config.AppSettings{
 		Database: filepath.Join(homeDir, "scribe-nb", "scribeNB.db"), //this one for release
 		//Database: filepath.Join(homeDir,"sync","scribe","scribeNB.db"), //temp one for dev
 		InitialLayout:    "grid",
 		InitialView:      "pinned",
 		NoteHeight:       350,
 		NoteWidth:        600,
-		RecentNotesLimit: 8,
-		GridMaxPages:     100,
+		RecentNotesLimit: 50,
+		GridMaxPages:     500,
+		DarkColour: "#2f2f2f",
+		LightColour: "#e2e2e2",
 	}
 	newConfig := config.Config{
 		Title:       fmt.Sprintf("Scribe-nb v%s", VERSION),
-		AppSettings: appSettings,
+		Settings: appSettings,
 	}
 
 	return newConfig
