@@ -18,6 +18,8 @@ import (
 	//"github.com/fyne-io/terminal"
 )
 
+var noteWindow fyne.Window
+
 func OpenNoteWindow(noteId uint) {
 	var PinBtn *widget.Button
 	var err error
@@ -72,7 +74,7 @@ func OpenNoteWindow(noteId uint) {
 	//calculate initial note content hash
 	note.UpdateHash(&noteInfo)
 
-	noteWindow := mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+	noteWindow = mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
 	noteWindow.Resize(fyne.NewSize(900, 750))
 
 	entry := widget.NewMultiLineEntry()
@@ -147,64 +149,7 @@ func OpenNoteWindow(noteId uint) {
 	})
 
 	//changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
-	changeNotebookBtn := widget.NewButtonWithIcon("", theme.FolderOpenIcon(), func(){
-		var notebooks []string
-		var err error
-		if notebooks, err = scribedb.GetNotebooks(); err != nil{
-			log.Println("Error getting notebook")
-			log.Panicln(err)
-		}
-		nbMenu := fyne.NewMenu("Select Notebook")
-
-		//Add new notebook entry to menu
-		nbMenuItem := fyne.NewMenuItem("*New*",func(){
-			//fmt.Println("Need to ask use for new notebook name here!!!!!!!!")
-			notebookEntry := widget.NewEntry()
-			eNotebookEntry := widget.NewFormItem("Name", notebookEntry)
-			newNotebookDialog := dialog.NewForm("New Notebook?", "OK", "Cancel", []*widget.FormItem{eNotebookEntry}, func(confirmed bool) {
-				if confirmed{
-					//check that the notebook does not already exist
-					exists, err := scribedb.CheckNotebookExists(notebookEntry.Text)
-					if (err == nil){
-						if exists == false{
-							//chnage notebook to this new notebook
-							noteInfo.Notebook = notebookEntry.Text
-							noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
-							_,err = note.SaveNote(&noteInfo)
-							if err != nil{
-								log.Print("Error saving note: ")
-								log.Panic(err)
-							}
-							UpdateNotebooksList()
-						}
-					}else{
-						log.Panicln(fmt.Sprintf("Error check notebook exists: %s",err))
-					}
-				}
-			}, noteWindow)
-			newNotebookDialog.Show()
-		})
-
-		nbMenu.Items = append(nbMenu.Items, nbMenuItem)
-
-		//Now add all the existing notebooks to the menu
-		for _, notebook := range notebooks{
-			menuItem := fyne.NewMenuItem(notebook, func(){
-				noteInfo.Notebook = notebook
-				//fmt.Println("Change notebook to " + notebook)
-				noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
-			})
-			nbMenu.Items = append(nbMenu.Items, menuItem)
-		}
-
-
-		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
-		//popUpMenu.Show()
-		pos := fyne.NewPos(250,40)
-		popUpMenu.ShowAtPosition(pos)
-		//popUpMenu.ShowAtPosition(e.Position.AddXY(150,0))
-
-	})
+	changeNotebookBtn := NewChangeNotebookButton(&noteInfo)
 
 	colourButton := widget.NewButtonWithIcon("",theme.ColorPaletteIcon(), func(){
 		picker := dialog.NewColorPicker("Note Color", "Pick colour", func(c color.Color){
@@ -314,6 +259,70 @@ func OpenNoteWindow(noteId uint) {
 
 	})
 	noteWindow.Show()
+}
+
+
+func NewChangeNotebookButton(noteInfo *note.NoteInfo)*widget.Button{
+	changeNotebookBtn := widget.NewButtonWithIcon("", theme.FolderOpenIcon(), func(){
+		var notebooks []string
+		var err error
+		if notebooks, err = scribedb.GetNotebooks(); err != nil{
+			log.Println("Error getting notebook")
+			log.Panicln(err)
+		}
+		nbMenu := fyne.NewMenu("Select Notebook")
+
+		//Add new notebook entry to menu
+		nbMenuItem := fyne.NewMenuItem("*New*",func(){
+			//fmt.Println("Need to ask use for new notebook name here!!!!!!!!")
+			notebookEntry := widget.NewEntry()
+			eNotebookEntry := widget.NewFormItem("Name", notebookEntry)
+			newNotebookDialog := dialog.NewForm("New Notebook?", "OK", "Cancel", []*widget.FormItem{eNotebookEntry}, func(confirmed bool) {
+				if confirmed{
+					//check that the notebook does not already exist
+					exists, err := scribedb.CheckNotebookExists(notebookEntry.Text)
+					if (err == nil){
+						if exists == false{
+							//chnage notebook to this new notebook
+							noteInfo.Notebook = notebookEntry.Text
+							noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+							_,err = note.SaveNote(noteInfo)
+							if err != nil{
+								log.Print("Error saving note: ")
+								log.Panic(err)
+							}
+							UpdateNotebooksList()
+						}
+					}else{
+						log.Panicln(fmt.Sprintf("Error check notebook exists: %s",err))
+					}
+				}
+			}, noteWindow)
+			newNotebookDialog.Show()
+		})
+
+		nbMenu.Items = append(nbMenu.Items, nbMenuItem)
+
+		//Now add all the existing notebooks to the menu
+		for _, notebook := range notebooks{
+			menuItem := fyne.NewMenuItem(notebook, func(){
+				noteInfo.Notebook = notebook
+				//fmt.Println("Change notebook to " + notebook)
+				noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+			})
+			nbMenu.Items = append(nbMenu.Items, menuItem)
+		}
+
+
+		popUpMenu := widget.NewPopUpMenu(nbMenu, noteWindow.Canvas())
+		//popUpMenu.Show()
+		pos := fyne.NewPos(250,40)
+		popUpMenu.ShowAtPosition(pos)
+		//popUpMenu.ShowAtPosition(e.Position.AddXY(150,0))
+
+	})
+
+	return changeNotebookBtn
 }
 
 
