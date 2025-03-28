@@ -83,7 +83,8 @@ func CreateMainPanel() *fyne.Container {
 
 func CreateTopPanel() *fyne.Container {
 	//AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	//spacerLabel := widget.NewLabel("                                ")
+	spacerLabel := widget.NewLabel("                                ")
+	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes      >", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	AppWidgets.pageLabel = widget.NewLabel("Page: ")
 	AppWidgets.pageLabel.Hide()
@@ -125,8 +126,16 @@ func CreateTopPanel() *fyne.Container {
 	)
 
 	AppWidgets.toolbar = toolbar
-	//topPanel := container.New(layout.NewHBoxLayout(), spacerLabel, AppWidgets.viewLabel, layout.NewSpacer(),layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(),spacerLabel,spacerLabel, settingsBar)
-	topPanel := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), toolbar, AppWidgets.pageLabel, layout.NewSpacer(), settingsBar)
+	topPanel := container.New(layout.NewHBoxLayout(),
+		  spacerLabel,
+		  AppWidgets.viewLabel,
+		  layout.NewSpacer(),
+		  toolbar,
+		  AppWidgets.pageLabel,
+		  layout.NewSpacer(),
+		  spacerLabel,
+		  settingsBar,
+	)
 
 	return topPanel
 }
@@ -134,9 +143,6 @@ func CreateTopPanel() *fyne.Container {
 func CreateSidePanel() *fyne.Container {
 	var listPanel *fyne.Container
 	var searchPanel *fyne.Container
-
-	AppWidgets.viewLabel = widget.NewLabelWithStyle("Pinned Notes      >", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-
 
 	searchPanel = CreateSearchPanel()
 
@@ -209,7 +215,7 @@ func CreateSidePanel() *fyne.Container {
 
 	spacerLabel := widget.NewLabel(" ")
 
-	btnPanel := container.NewVBox(AppWidgets.viewLabel, spacerLabel,searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
+	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	listPanel = container.NewStack(AppWidgets.notebooksList)
 	listPanel.Hide()
 	searchPanel.Hide()
@@ -366,11 +372,11 @@ func UpdateView() error {
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
 	switch AppStatus.currentView {
 	case VIEW_PINNED:
-		AppWidgets.viewLabel.SetText("Pinned Notes >")
+		AppWidgets.viewLabel.SetText("Pinned Notes")
 		AppStatus.notes, err = scribedb.GetPinnedNotes()
 		AppStatus.currentNotebook = ""
 	case VIEW_RECENT:
-		AppWidgets.viewLabel.SetText(("Recent Notes >"))
+		AppWidgets.viewLabel.SetText(("Recent Notes"))
 		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentNotebook = ""
 	case VIEW_NOTEBOOK:
@@ -379,7 +385,7 @@ func UpdateView() error {
 	case VIEW_SEARCH:
 		AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
 		if err == nil {
-			AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) >", len(AppStatus.notes)))
+			AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) > ", len(AppStatus.notes)))
 		}
 
 	default:
