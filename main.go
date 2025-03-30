@@ -85,11 +85,11 @@ func CreateAppConfig(homeDir string) config.Config {
 		NoteWidth:        600,
 		RecentNotesLimit: 50,
 		GridMaxPages:     500,
-		DarkColour: "#2f2f2f",
-		LightColour: "#e2e2e2",
+		DarkColour:       "#2f2f2f",
+		LightColour:      "#e2e2e2",
 	}
 	newConfig := config.Config{
-		Title:       fmt.Sprintf("Scribe-nb v%s", VERSION),
+		Title:    fmt.Sprintf("Scribe-nb v%s", VERSION),
 		Settings: appSettings,
 	}
 
