@@ -8,6 +8,7 @@ import (
 	"scribe-nb/note"
 	"scribe-nb/scribedb"
 	"slices"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -232,20 +233,7 @@ func CreateSearchPanel() *fyne.Container {
 
 	AppWidgets.searchResultsLabel = widget.NewLabel("")
 	filterLabel := widget.NewLabel("Filter: -")
-	searchFilter := widget.NewRadioGroup([]string{"All", "Current Notebook", "Pinned", "Recent"}, func(value string) {
-		switch value {
-		case "All":
-
-		case "Current notebook":
-
-		case "Pinned":
-
-		case "Recent":
-
-		}
-	})
-	searchFilter.SetSelected("All")
-
+	searchFilter := widget.NewCheckGroup([]string{"Current Notebook", "Pinned"}, func([]string) {})
 	searchLabel := widget.NewLabel("               Search:               ")
 	AppWidgets.searchEntry = widget.NewEntry()
 	AppWidgets.searchEntry.OnSubmitted = func(text string) {
@@ -257,6 +245,7 @@ func CreateSearchPanel() *fyne.Container {
 		}
 
 	}
+
 	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
 	return searchPanel
 }
@@ -386,9 +375,12 @@ func UpdateView() error {
 		AppWidgets.viewLabel.SetText("Notebook - " + AppStatus.currentNotebook)
 		AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
 	case VIEW_SEARCH:
-		AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
-		if err == nil {
-			AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) > ", len(AppStatus.notes)))
+		if len(strings.TrimSpace(AppWidgets.searchEntry.Text)) > 0 {
+			AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
+			if err == nil {
+				AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) > ", len(AppStatus.notes)))
+				AppWidgets.viewLabel.SetText("Search Results")
+			}
 		}
 
 	default:
