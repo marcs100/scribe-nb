@@ -17,8 +17,6 @@ func GetThemeColours() AppColours {
 	case theme.VariantDark:
 		appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourBg)
 		if err != nil {
-			log.Println("************* here we are **********************************")
-			log.Println(Conf.Settings.DarkColourBg)
 			log.Panicln(err)
 		}
 		appColours.NoteBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourNote)
