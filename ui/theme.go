@@ -1,22 +1,39 @@
 package ui
 
 import (
+	"log"
+
 	"fyne.io/fyne/v2/theme"
-	"image/color"
 )
 
 // Background colour for notes based on current theme variane light/dark
-func GetThemeColour() color.Color {
-	var themeColour color.Color
+func GetThemeColours() AppColours {
+	var appColours AppColours
+	var err error
 	themeVariant := mainApp.Settings().ThemeVariant()
-	themeColour = mainApp.Settings().Theme().Color(theme.ColorNameBackground, themeVariant)
-	modDarkColour, _ := RGBStringToFyneColor(Conf.Settings.DarkColour)
-	modLightColour, _ := RGBStringToFyneColor(Conf.Settings.LightColour)
+	appColours.MainBgColour = mainApp.Settings().Theme().Color(theme.ColorNameBackground, themeVariant)
+	appColours.NoteBgColour = appColours.MainBgColour
 	switch themeVariant {
 	case theme.VariantDark:
-		themeColour = modDarkColour
+		appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourBg)
+		if err != nil {
+			log.Println("************* here we are **********************************")
+			log.Println(Conf.Settings.DarkColourBg)
+			log.Panicln(err)
+		}
+		appColours.NoteBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourNote)
+		if err != nil {
+			log.Panicln(err)
+		}
 	case theme.VariantLight:
-		themeColour = modLightColour
+		appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.LightColourBg)
+		if err != nil {
+			log.Panicln(err)
+		}
+		appColours.NoteBgColour, err = RGBStringToFyneColor(Conf.Settings.LightColourNote)
+		if err != nil {
+			log.Panicln(err)
+		}
 	}
-	return themeColour
+	return appColours
 }

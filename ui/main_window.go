@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+
 	//"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -29,7 +30,7 @@ func CreateMainWindow(version string) {
 
 	AppStatus.noteSize = fyne.NewSize(Conf.Settings.NoteWidth, Conf.Settings.NoteHeight)
 
-	AppStatus.themeBgColour = GetThemeColour()
+	AppTheme = GetThemeColours()
 
 	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 
@@ -76,7 +77,9 @@ func CreateMainPanel() *fyne.Container {
 	AppContainers.mainGridContainer = mainGridContainer
 	mainPageContainer := container.NewScroll(AppContainers.singleNoteStack)
 	AppContainers.mainPageContainer = mainPageContainer
-	mainStackedContainer := container.NewStack(mainPageContainer, mainGridContainer)
+	bgRect := canvas.NewRectangle(AppTheme.MainBgColour)
+
+	mainStackedContainer := container.NewStack(bgRect, mainPageContainer, mainGridContainer)
 
 	return mainStackedContainer
 }
@@ -127,14 +130,14 @@ func CreateTopPanel() *fyne.Container {
 
 	AppWidgets.toolbar = toolbar
 	topPanel := container.New(layout.NewHBoxLayout(),
-		  spacerLabel,
-		  AppWidgets.viewLabel,
-		  layout.NewSpacer(),
-		  toolbar,
-		  AppWidgets.pageLabel,
-		  layout.NewSpacer(),
-		  spacerLabel,
-		  settingsBar,
+		spacerLabel,
+		AppWidgets.viewLabel,
+		layout.NewSpacer(),
+		toolbar,
+		AppWidgets.pageLabel,
+		layout.NewSpacer(),
+		spacerLabel,
+		settingsBar,
 	)
 
 	return topPanel
@@ -199,7 +202,7 @@ func CreateSidePanel() *fyne.Container {
 
 	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func() {
 		UpdateNotebooksList()
-		if AppStatus.currentView != VIEW_NOTEBOOK{
+		if AppStatus.currentView != VIEW_NOTEBOOK {
 			AppWidgets.viewLabel.SetText("Notebooks")
 		}
 
@@ -294,11 +297,11 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
 			}
 		})
 		richText.Wrapping = fyne.TextWrapWord
-		themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
+		themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
 		noteColour, _ := RGBStringToFyneColor(notes[i].BackgroundColour)
 		noteBackground := canvas.NewRectangle(noteColour)
 		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF" {
-			noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
+			noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 		}
 
 		colourStack := container.NewStack(noteBackground)
@@ -347,11 +350,11 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 	AppWidgets.singleNotePage.Wrapping = fyne.TextWrapWord
 	AppWidgets.singleNotePage.Refresh()
 
-	themeBackground := canvas.NewRectangle(AppStatus.themeBgColour)
+	themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
 	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
 	noteBackground := canvas.NewRectangle(noteColour)
 	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "ffffff" {
-		noteBackground = canvas.NewRectangle(AppStatus.themeBgColour) // colour not set or using the old scribe default note colour
+		noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 	}
 
 	colourStack := container.NewStack(noteBackground)

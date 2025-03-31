@@ -1,9 +1,7 @@
 package config
 
-import ()
-
 type Config struct {
-	Title       string
+	Title    string
 	Settings AppSettings `toml:"settings"`
 }
 
@@ -15,6 +13,8 @@ type AppSettings struct {
 	InitialView      string  `toml:"initial_view"`
 	InitialLayout    string  `toml:"initial_layout"`
 	GridMaxPages     int     `toml:"grid_max_pages"`
-	DarkColour       string  `toml:"dark_colour"`
-	LightColour	 string  `toml:"light_colour"`
+	DarkColourNote   string  `toml:"dark_colour_note"`
+	LightColourNote  string  `toml:"light_colour_note"`
+	DarkColourBg     string  `toml:"dark_colour_bg"`
+	LightColourBg    string  `toml:"light_colour_bg"`
 }
