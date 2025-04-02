@@ -233,7 +233,7 @@ func CreateSearchPanel() *fyne.Container {
 
 	AppWidgets.searchResultsLabel = widget.NewLabel("")
 	filterLabel := widget.NewLabel("Filter: -")
-	searchFilter := widget.NewCheckGroup([]string{"Current Notebook", "Pinned"}, func([]string) {})
+	searchFilter := widget.NewCheckGroup([]string{"Whole word only", "Pinned"}, func([]string) {})
 	searchLabel := widget.NewLabel("               Search:               ")
 	AppWidgets.searchEntry = widget.NewEntry()
 	AppWidgets.searchEntry.OnSubmitted = func(text string) {
