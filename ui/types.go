@@ -77,6 +77,7 @@ type ApplicationStatus struct {
 	notebooks       []string
 	openNotes       []uint //maintain a list of notes that are currently open
 	noteSize        fyne.Size
+	searchFilter    scribedb.SearchFilter
 }
 
 type AppColours struct {

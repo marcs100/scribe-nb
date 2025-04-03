@@ -233,7 +233,25 @@ func CreateSearchPanel() *fyne.Container {
 
 	AppWidgets.searchResultsLabel = widget.NewLabel("")
 	filterLabel := widget.NewLabel("Filter: -")
-	searchFilter := widget.NewCheckGroup([]string{"Whole word only", "Pinned"}, func([]string) {})
+	searchFilter := widget.NewCheckGroup([]string{SEARCH_FILT_WOLE_WORDS, SEARCH_FILT_PINNED}, func(selected []string) {
+		AppStatus.searchFilter.Pinned = false
+		AppStatus.searchFilter.WholeWords = false
+		for _, sel := range selected {
+			fmt.Println("selected: " + sel)
+			if sel == SEARCH_FILT_PINNED {
+				AppStatus.searchFilter.Pinned = true
+			}
+
+			if sel == SEARCH_FILT_WOLE_WORDS {
+				AppStatus.searchFilter.WholeWords = true
+			}
+		}
+		var err error = UpdateView()
+		if err != nil {
+			log.Print("Error getting search results (after setting filter): ")
+			log.Panic(err)
+		}
+	})
 	searchLabel := widget.NewLabel("               Search:               ")
 	AppWidgets.searchEntry = widget.NewEntry()
 	AppWidgets.searchEntry.OnSubmitted = func(text string) {
@@ -376,7 +394,7 @@ func UpdateView() error {
 		AppStatus.notes, err = scribedb.GetNotebook(AppStatus.currentNotebook)
 	case VIEW_SEARCH:
 		if len(strings.TrimSpace(AppWidgets.searchEntry.Text)) > 0 {
-			AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text)
+			AppStatus.notes, err = scribedb.GetSearchResults(AppWidgets.searchEntry.Text, AppStatus.searchFilter)
 			if err == nil {
 				AppWidgets.searchResultsLabel.SetText(fmt.Sprintf("Found (%d) > ", len(AppStatus.notes)))
 				AppWidgets.viewLabel.SetText("Search Results")
