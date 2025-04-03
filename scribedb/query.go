@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -114,32 +115,18 @@ func getSearchResults(searchText string, filter SearchFilter) ([]NoteData, error
 
 	query := "select * from notes where content like ? "
 	searchTerm := "%" + searchText + "%"
+	if filter.WholeWords {
+		query = "select * from notes where (content like ? or content like ? or content like ?)"
+		st1 = fmt.Sprint(searchText, " %")
+		st2 = fmt.Sprint("% ", searchText, " %")
+		st3 = fmt.Sprint("% ", searchText)
+		/*fmt.Println(st1)
+		fmt.Println(st2)
+		fmt.Println(st3)*/
+	}
 
 	if filter.Pinned {
 		query = fmt.Sprintf("%s and pinned = 1", query)
-	}
-
-	if filter.WholeWords {
-		/*
-							searchQuery + ' %',
-			                '% '+searchQuery+' %',
-			                '% '+searchQuery+chr(10)+'%',
-			                searchQuery+chr(10)+'%',
-			                '%'+chr(10)+searchQuery+chr(10)+'%'
-		*/
-		query = "select * from notes where content like ? or content like ? or content like ? "
-		st1 = fmt.Sprint("'", searchText, " %'")
-		st2 = fmt.Sprint("'% ", searchText, " %'")
-		st3 = fmt.Sprint("'% ", searchText, "'")
-		/*searchTerm = fmt.Sprint(
-		"'", searchText, " %'",
-		" or content like '% ", searchText, " %'",
-		" or content like '% ", searchText, "'")
-		*/
-		//fmt.Println(searchTerm)
-		fmt.Println(st1)
-		fmt.Println(st2)
-		fmt.Println(st3)
 	}
 
 	query = fmt.Sprintf("%s order by modified desc", query)
@@ -150,8 +137,13 @@ func getSearchResults(searchText string, filter SearchFilter) ([]NoteData, error
 	if filter.WholeWords == false {
 		rows, err = db.Query(query, searchTerm)
 	} else {
-		rows, err = db.Query(query, st1, st2, st3)
+		dbprep, err2 := db.Prepare(query)
+		if err2 != nil {
+			log.Panicln(err2)
+		}
+		rows, err = dbprep.Query(st1, st2, st3)
 	}
+
 	var notes []NoteData
 	defer rows.Close()
 	for rows.Next() {
@@ -164,10 +156,5 @@ func getSearchResults(searchText string, filter SearchFilter) ([]NoteData, error
 
 		notes = append(notes, note)
 	}
-
-	//fmt.Println(notes[1].content)
-	//fmt.Println(notes[2].content)
-	//fmt.Println(notes[3].content)
-
 	return notes, err
 }

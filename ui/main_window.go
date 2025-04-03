@@ -154,6 +154,9 @@ func CreateSidePanel() *fyne.Container {
 		if listPanel != nil {
 			listPanel.Hide()
 		}
+		if searchPanel != nil {
+			searchPanel.Hide()
+		}
 		OpenNoteWindow(0) //new note has id=0
 	})
 
@@ -172,6 +175,9 @@ func CreateSidePanel() *fyne.Container {
 		if listPanel != nil {
 			listPanel.Hide()
 		}
+		if searchPanel != nil {
+			searchPanel.Hide()
+		}
 		var err error
 		//AppStatus.notes,err = scribedb.GetPinnedNotes()
 		AppStatus.currentView = VIEW_PINNED
@@ -187,6 +193,9 @@ func CreateSidePanel() *fyne.Container {
 	RecentBtn := widget.NewButtonWithIcon("Recent", theme.HistoryIcon(), func() {
 		if listPanel != nil {
 			listPanel.Hide()
+		}
+		if searchPanel != nil {
+			searchPanel.Hide()
 		}
 		var err error
 		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
