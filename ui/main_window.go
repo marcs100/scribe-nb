@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 
 	//"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -68,6 +69,9 @@ func CreateMainWindow(version string) {
 	if err := UpdateView(); err != nil {
 		fmt.Println(err)
 	}
+
+	//keyboard shortcuts
+	AddKeyboardShortcuts()
 
 	mainWindow.ShowAndRun()
 }
@@ -145,44 +149,33 @@ func CreateTopPanel() *fyne.Container {
 }
 
 func CreateSidePanel() *fyne.Container {
-	var listPanel *fyne.Container
-	var searchPanel *fyne.Container
-
-	searchPanel = CreateSearchPanel()
+	AppContainers.searchPanel = CreateSearchPanel()
 
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func() {
-		if listPanel != nil {
-			listPanel.Hide()
+		if AppContainers.listPanel != nil {
+			AppContainers.listPanel.Hide()
 		}
-		if searchPanel != nil {
-			searchPanel.Hide()
+		if AppContainers.searchPanel != nil {
+			AppContainers.searchPanel.Hide()
 		}
 		OpenNoteWindow(0) //new note has id=0
 	})
 
 	searchBtn := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
 		//Display the search panel here
-		if searchPanel.Hidden {
-			searchPanel.Show()
-			mainWindow.Canvas().Focus(AppWidgets.searchEntry)
+		if AppContainers.searchPanel.Hidden {
+			AppContainers.searchPanel.Show()
+			//mainWindow.Canvas().Focus(AppWidgets.searchEntry)
 		} else {
-			searchPanel.Hide()
+			AppContainers.searchPanel.Hide()
 		}
+		//ShowSearchPanel()
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
 	pinnedBtn := widget.NewButtonWithIcon("Pinned", theme.RadioButtonCheckedIcon(), func() {
-		if listPanel != nil {
-			listPanel.Hide()
-		}
-		if searchPanel != nil {
-			searchPanel.Hide()
-		}
 		var err error
-		//AppStatus.notes,err = scribedb.GetPinnedNotes()
 		AppStatus.currentView = VIEW_PINNED
-		//ShowNotesInGrid(notes,noteSize)
-		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting pinned notes: ")
@@ -191,16 +184,9 @@ func CreateSidePanel() *fyne.Container {
 	})
 
 	RecentBtn := widget.NewButtonWithIcon("Recent", theme.HistoryIcon(), func() {
-		if listPanel != nil {
-			listPanel.Hide()
-		}
-		if searchPanel != nil {
-			searchPanel.Hide()
-		}
 		var err error
 		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentView = VIEW_RECENT
-		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting recent notes: ")
@@ -216,11 +202,11 @@ func CreateSidePanel() *fyne.Container {
 			AppWidgets.viewLabel.SetText("Notebooks")
 		}
 
-		if listPanel != nil {
-			if listPanel.Visible() {
-				listPanel.Hide()
+		if AppContainers.listPanel != nil {
+			if AppContainers.listPanel.Visible() {
+				AppContainers.listPanel.Hide()
 			} else {
-				listPanel.Show()
+				AppContainers.listPanel.Show()
 			}
 		}
 		PageView.Reset()
@@ -229,11 +215,11 @@ func CreateSidePanel() *fyne.Container {
 	spacerLabel := widget.NewLabel(" ")
 
 	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
-	listPanel = container.NewStack(AppWidgets.notebooksList)
-	listPanel.Hide()
-	searchPanel.Hide()
+	AppContainers.listPanel = container.NewStack(AppWidgets.notebooksList)
+	AppContainers.listPanel.Hide()
+	AppContainers.searchPanel.Hide()
 
-	sideContainer := container.NewHBox(btnPanel, listPanel, searchPanel)
+	sideContainer := container.NewHBox(btnPanel, AppContainers.listPanel, AppContainers.listPanel)
 
 	return sideContainer
 }
@@ -273,8 +259,7 @@ func CreateSearchPanel() *fyne.Container {
 
 	}
 
-	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
-	return searchPanel
+	return container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
 }
 
 func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
@@ -391,10 +376,24 @@ func UpdateView() error {
 	//fyne.CurrentApp().SendNotification(fyne.NewNotification("Current View: ", currentView))
 	switch AppStatus.currentView {
 	case VIEW_PINNED:
+		if AppContainers.listPanel != nil {
+			AppContainers.listPanel.Hide()
+		}
+		if AppContainers.searchPanel != nil {
+			AppContainers.searchPanel.Hide()
+		}
+		PageView.Reset()
 		AppWidgets.viewLabel.SetText("Pinned Notes")
 		AppStatus.notes, err = scribedb.GetPinnedNotes()
 		AppStatus.currentNotebook = ""
 	case VIEW_RECENT:
+		if AppContainers.listPanel != nil {
+			AppContainers.listPanel.Hide()
+		}
+		if AppContainers.searchPanel != nil {
+			AppContainers.searchPanel.Hide()
+		}
+		PageView.Reset()
 		AppWidgets.viewLabel.SetText(("Recent Notes"))
 		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentNotebook = ""
@@ -479,4 +478,42 @@ func UpdateNotebooksList() {
 		log.Panic(err)
 	}
 	AppWidgets.notebooksList.Refresh()
+}
+
+func ShowSearchPanel() {
+	fmt.Println("Want to show search panel")
+	//AppContainers.searchPanel.Show()
+	if AppContainers.searchPanel.Hidden {
+		AppContainers.searchPanel.Show()
+		//mainWindow.Canvas().Focus(AppWidgets.searchEntry)
+	} else {
+		AppContainers.searchPanel.Hide()
+	}
+}
+
+func AddKeyboardShortcuts() {
+	// Add a standard shortcut (Ctrl+S)
+	ctrl_p := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyP,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
+		var err error
+		AppStatus.currentView = VIEW_PINNED
+		err = UpdateView()
+		if err != nil {
+			log.Print("Error getting pinned notes: ")
+			log.Panic(err)
+		}
+	})
+
+	ctrl_f := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyF,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	mainWindow.Canvas().AddShortcut(ctrl_f, func(shortcut fyne.Shortcut) {
+		ShowSearchPanel()
+	})
 }
