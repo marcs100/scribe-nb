@@ -151,6 +151,10 @@ func CreateTopPanel() *fyne.Container {
 func CreateSidePanel() *fyne.Container {
 	AppContainers.searchPanel = CreateSearchPanel()
 
+	if AppContainers.searchPanel != nil {
+		fmt.Println("We have a search panel!!!!!!!!!!")
+	}
+
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func() {
 		if AppContainers.listPanel != nil {
 			AppContainers.listPanel.Hide()
@@ -163,13 +167,7 @@ func CreateSidePanel() *fyne.Container {
 
 	searchBtn := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
 		//Display the search panel here
-		if AppContainers.searchPanel.Hidden {
-			AppContainers.searchPanel.Show()
-			//mainWindow.Canvas().Focus(AppWidgets.searchEntry)
-		} else {
-			AppContainers.searchPanel.Hide()
-		}
-		//ShowSearchPanel()
+		ShowSearchPanel()
 	})
 
 	//pinnedBtn := widget.NewButton("P", func(){
@@ -217,9 +215,9 @@ func CreateSidePanel() *fyne.Container {
 	btnPanel := container.NewVBox(searchBtn, newNoteBtn, spacerLabel, pinnedBtn, RecentBtn, notebooksBtn)
 	AppContainers.listPanel = container.NewStack(AppWidgets.notebooksList)
 	AppContainers.listPanel.Hide()
-	AppContainers.searchPanel.Hide()
+	//AppContainers.searchPanel.Hide()
 
-	sideContainer := container.NewHBox(btnPanel, AppContainers.listPanel, AppContainers.listPanel)
+	sideContainer := container.NewHBox(btnPanel, AppContainers.listPanel, AppContainers.searchPanel)
 
 	return sideContainer
 }
@@ -259,7 +257,8 @@ func CreateSearchPanel() *fyne.Container {
 
 	}
 
-	return container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
+	searchPanel := container.NewVBox(searchLabel, AppWidgets.searchEntry, AppWidgets.searchResultsLabel, filterLabel, searchFilter)
+	return searchPanel
 }
 
 func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
@@ -485,7 +484,7 @@ func ShowSearchPanel() {
 	//AppContainers.searchPanel.Show()
 	if AppContainers.searchPanel.Hidden {
 		AppContainers.searchPanel.Show()
-		//mainWindow.Canvas().Focus(AppWidgets.searchEntry)
+		mainWindow.Canvas().Focus(AppWidgets.searchEntry)
 	} else {
 		AppContainers.searchPanel.Hide()
 	}

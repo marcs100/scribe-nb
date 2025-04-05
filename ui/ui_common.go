@@ -24,11 +24,11 @@ const (
 	SEARCH_FILT_WOLE_WORDS string = "Whole words only"
 )
 
+var mainApp fyne.App
+var mainWindow fyne.Window
 var AppContainers ApplicationContainers //structure containing pointers to fyne containers
 var AppWidgets ApplicationWidgets       //structure containing pointers to fyne widgets
 var PageView PageViewStatus             // structure to track page numbers
 var AppStatus ApplicationStatus         // structure containing various app status
 var Conf *config.Config
-var mainApp fyne.App
-var mainWindow fyne.Window
 var AppTheme AppColours
