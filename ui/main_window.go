@@ -156,13 +156,7 @@ func CreateSidePanel() *fyne.Container {
 	}
 
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func() {
-		if AppContainers.listPanel != nil {
-			AppContainers.listPanel.Hide()
-		}
-		if AppContainers.searchPanel != nil {
-			AppContainers.searchPanel.Hide()
-		}
-		OpenNoteWindow(0) //new note has id=0
+		CreateNewNote()
 	})
 
 	searchBtn := widget.NewButtonWithIcon("", theme.SearchIcon(), func() {
@@ -195,19 +189,7 @@ func CreateSidePanel() *fyne.Container {
 	CreateNotebooksList()
 
 	notebooksBtn := widget.NewButtonWithIcon("Notebooks", theme.FolderOpenIcon(), func() {
-		UpdateNotebooksList()
-		if AppStatus.currentView != VIEW_NOTEBOOK {
-			AppWidgets.viewLabel.SetText("Notebooks")
-		}
-
-		if AppContainers.listPanel != nil {
-			if AppContainers.listPanel.Visible() {
-				AppContainers.listPanel.Hide()
-			} else {
-				AppContainers.listPanel.Show()
-			}
-		}
-		PageView.Reset()
+		ShowNotebooks()
 	})
 
 	spacerLabel := widget.NewLabel(" ")
@@ -250,6 +232,7 @@ func CreateSearchPanel() *fyne.Container {
 	AppWidgets.searchEntry.OnSubmitted = func(text string) {
 		AppStatus.currentView = VIEW_SEARCH
 		var err error = UpdateView()
+		mainWindow.Canvas().Unfocus() //unfocuses entry to allow keyboard shortcits ro work
 		if err != nil {
 			log.Print("Error getting search results: ")
 			log.Panic(err)
@@ -480,14 +463,44 @@ func UpdateNotebooksList() {
 }
 
 func ShowSearchPanel() {
-	fmt.Println("Want to show search panel")
+	fmt.Println("Show search panel actioned")
 	//AppContainers.searchPanel.Show()
 	if AppContainers.searchPanel.Hidden {
+		fmt.Println("Show search panel is hidden, will now show it")
 		AppContainers.searchPanel.Show()
 		mainWindow.Canvas().Focus(AppWidgets.searchEntry)
 	} else {
+		fmt.Println("Show search panel is already showing, will now hide it")
+		mainWindow.Canvas().Unfocus() //unfocuses entry to allow keyboard shortcits ro work
 		AppContainers.searchPanel.Hide()
 	}
+	mainWindow.Canvas().Refresh(AppContainers.searchPanel)
+}
+
+func CreateNewNote() {
+	if AppContainers.listPanel != nil {
+		AppContainers.listPanel.Hide()
+	}
+	if AppContainers.searchPanel != nil {
+		AppContainers.searchPanel.Hide()
+	}
+	OpenNoteWindow(0) //new note has id=0
+}
+
+func ShowNotebooks() {
+	UpdateNotebooksList()
+	if AppStatus.currentView != VIEW_NOTEBOOK {
+		AppWidgets.viewLabel.SetText("Notebooks")
+	}
+
+	if AppContainers.listPanel != nil {
+		if AppContainers.listPanel.Visible() {
+			AppContainers.listPanel.Hide()
+		} else {
+			AppContainers.listPanel.Show()
+		}
+	}
+	PageView.Reset()
 }
 
 func AddKeyboardShortcuts() {
@@ -497,6 +510,7 @@ func AddKeyboardShortcuts() {
 		Modifier: fyne.KeyModifierControl,
 	}
 
+	//Keyboard shortcut to show Pinned Notes
 	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
 		var err error
 		AppStatus.currentView = VIEW_PINNED
@@ -506,7 +520,23 @@ func AddKeyboardShortcuts() {
 			log.Panic(err)
 		}
 	})
+	ctrl_r := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyR,
+		Modifier: fyne.KeyModifierControl,
+	}
 
+	//Keyboard shortcut to show Recent notes
+	mainWindow.Canvas().AddShortcut(ctrl_r, func(shortcut fyne.Shortcut) {
+		var err error
+		AppStatus.currentView = VIEW_RECENT
+		err = UpdateView()
+		if err != nil {
+			log.Print("Error getting recent notes: ")
+			log.Panic(err)
+		}
+	})
+
+	//Keyboard shortcut to show search panel
 	ctrl_f := &desktop.CustomShortcut{
 		KeyName:  fyne.KeyF,
 		Modifier: fyne.KeyModifierControl,
@@ -515,4 +545,23 @@ func AddKeyboardShortcuts() {
 	mainWindow.Canvas().AddShortcut(ctrl_f, func(shortcut fyne.Shortcut) {
 		ShowSearchPanel()
 	})
+
+	//Keyboard shortcut to create a new note
+	ctrl_shift_n := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyN,
+		Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
+	}
+	mainWindow.Canvas().AddShortcut(ctrl_shift_n, func(shortcut fyne.Shortcut) {
+		CreateNewNote()
+	})
+
+	//Keyboard shortcut to show notebooks list
+	ctrl_n := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyN,
+		Modifier: fyne.KeyModifierControl,
+	}
+	mainWindow.Canvas().AddShortcut(ctrl_n, func(shortcut fyne.Shortcut) {
+		ShowNotebooks()
+	})
+
 }
