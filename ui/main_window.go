@@ -16,7 +16,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 
-	//"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -72,6 +72,15 @@ func CreateMainWindow(version string) {
 
 	//keyboard shortcuts
 	AddKeyboardShortcuts()
+
+	mainWindow.SetOnClosed(func() {
+		if len(AppStatus.openNotes) > 0 {
+			fmt.Println(fmt.Sprintf("len of opne notes array is %d", len(AppStatus.openNotes)))
+			//do not close if there are notes open
+			dlg := dialog.NewInformation("Error", "There are notes open, please close them before closing the application!", mainWindow)
+			dlg.Show()
+		}
+	})
 
 	mainWindow.ShowAndRun()
 }
@@ -150,11 +159,6 @@ func CreateTopPanel() *fyne.Container {
 
 func CreateSidePanel() *fyne.Container {
 	AppContainers.searchPanel = CreateSearchPanel()
-
-	if AppContainers.searchPanel != nil {
-		fmt.Println("We have a search panel!!!!!!!!!!")
-	}
-
 	newNoteBtn := widget.NewButtonWithIcon("+", theme.DocumentCreateIcon(), func() {
 		CreateNewNote()
 	})
@@ -168,6 +172,7 @@ func CreateSidePanel() *fyne.Container {
 	pinnedBtn := widget.NewButtonWithIcon("Pinned", theme.RadioButtonCheckedIcon(), func() {
 		var err error
 		AppStatus.currentView = VIEW_PINNED
+		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting pinned notes: ")
@@ -179,6 +184,7 @@ func CreateSidePanel() *fyne.Container {
 		var err error
 		//AppStatus.notes,err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentView = VIEW_RECENT
+		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting recent notes: ")
@@ -364,7 +370,6 @@ func UpdateView() error {
 		if AppContainers.searchPanel != nil {
 			AppContainers.searchPanel.Hide()
 		}
-		PageView.Reset()
 		AppWidgets.viewLabel.SetText("Pinned Notes")
 		AppStatus.notes, err = scribedb.GetPinnedNotes()
 		AppStatus.currentNotebook = ""
@@ -375,7 +380,6 @@ func UpdateView() error {
 		if AppContainers.searchPanel != nil {
 			AppContainers.searchPanel.Hide()
 		}
-		PageView.Reset()
 		AppWidgets.viewLabel.SetText(("Recent Notes"))
 		AppStatus.notes, err = scribedb.GetRecentNotes(Conf.Settings.RecentNotesLimit)
 		AppStatus.currentNotebook = ""
@@ -463,14 +467,10 @@ func UpdateNotebooksList() {
 }
 
 func ShowSearchPanel() {
-	fmt.Println("Show search panel actioned")
-	//AppContainers.searchPanel.Show()
 	if AppContainers.searchPanel.Hidden {
-		fmt.Println("Show search panel is hidden, will now show it")
 		AppContainers.searchPanel.Show()
 		mainWindow.Canvas().Focus(AppWidgets.searchEntry)
 	} else {
-		fmt.Println("Show search panel is already showing, will now hide it")
 		mainWindow.Canvas().Unfocus() //unfocuses entry to allow keyboard shortcits ro work
 		AppContainers.searchPanel.Hide()
 	}
@@ -514,6 +514,7 @@ func AddKeyboardShortcuts() {
 	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
 		var err error
 		AppStatus.currentView = VIEW_PINNED
+		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting pinned notes: ")
@@ -529,6 +530,7 @@ func AddKeyboardShortcuts() {
 	mainWindow.Canvas().AddShortcut(ctrl_r, func(shortcut fyne.Shortcut) {
 		var err error
 		AppStatus.currentView = VIEW_RECENT
+		PageView.Reset()
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting recent notes: ")
