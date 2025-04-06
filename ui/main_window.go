@@ -73,12 +73,14 @@ func CreateMainWindow(version string) {
 	//keyboard shortcuts
 	AddKeyboardShortcuts()
 
-	mainWindow.SetOnClosed(func() {
+	mainWindow.SetCloseIntercept(func() {
 		if len(AppStatus.openNotes) > 0 {
 			fmt.Println(fmt.Sprintf("len of opne notes array is %d", len(AppStatus.openNotes)))
 			//do not close if there are notes open
 			dlg := dialog.NewInformation("Error", "There are notes open, please close them before closing the application!", mainWindow)
 			dlg.Show()
+		} else {
+			mainWindow.Close()
 		}
 	})
 
