@@ -71,7 +71,7 @@ func CreateMainWindow(version string) {
 	}
 
 	//keyboard shortcuts
-	AddKeyboardShortcuts()
+	AddMainKeyboardShortcuts()
 
 	mainWindow.SetCloseIntercept(func() {
 		if len(AppStatus.openNotes) > 0 {
@@ -505,7 +505,7 @@ func ShowNotebooks() {
 	PageView.Reset()
 }
 
-func AddKeyboardShortcuts() {
+func AddMainKeyboardShortcuts() {
 	// Add a standard shortcut (Ctrl+S)
 	ctrl_p := &desktop.CustomShortcut{
 		KeyName:  fyne.KeyP,

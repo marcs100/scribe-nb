@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	//"fyne.io/fyne/v2/data/binding"
@@ -21,7 +22,6 @@ import (
 var noteWindow fyne.Window
 
 func OpenNoteWindow(noteId uint) {
-	var PinBtn *widget.Button
 	var err error
 	var retrievedNote scribedb.NoteData
 	var noteInfo note.NoteInfo
@@ -76,9 +76,19 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow = mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
 	noteWindow.Resize(fyne.NewSize(900, 750))
 
-	entry := widget.NewMultiLineEntry()
-	entry.Text = noteInfo.Content
-	entry.Wrapping = fyne.TextWrapWord
+	//NoteWidgets.entry = widget.NewMultiLineEntry()
+	ctrl_q := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyQ,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	NoteWidgets.entry = NewEntryCustom(ctrl_q, func() {
+		SetViewMode()
+	})
+
+	//NoteWidgets.entry = widget.NewMultiLineEntry()
+	NoteWidgets.entry.Text = noteInfo.Content
+	NoteWidgets.entry.Wrapping = fyne.TextWrapWord
 
 	themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
 	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
@@ -90,16 +100,16 @@ func OpenNoteWindow(noteId uint) {
 
 	colourStack := container.NewStack(noteBackground)
 
-	markdownText := widget.NewRichTextFromMarkdown(noteInfo.Content)
-	markdownText.Wrapping = fyne.TextWrapWord
-	markdownText.Hide()
-	markdownPadded := container.NewPadded(themeBackground, markdownText)
-	markdown := container.NewStack(colourStack, markdownPadded)
+	NoteWidgets.markdownText = widget.NewRichTextFromMarkdown(noteInfo.Content)
+	NoteWidgets.markdownText.Wrapping = fyne.TextWrapWord
+	NoteWidgets.markdownText.Hide()
+	markdownPadded := container.NewPadded(themeBackground, NoteWidgets.markdownText)
+	NoteContainers.markdown = container.NewStack(colourStack, markdownPadded)
 	spacerLabel := widget.NewLabel("      ")
 
-	scrolledMarkdown := container.NewScroll(markdown)
+	scrolledMarkdown := container.NewScroll(NoteContainers.markdown)
 	background := canvas.NewRectangle(AppTheme.NoteBgColour)
-	content := container.NewStack(background, scrolledMarkdown, entry)
+	content := container.NewStack(background, scrolledMarkdown, NoteWidgets.entry)
 
 	var win *fyne.Container
 
@@ -110,44 +120,8 @@ func OpenNoteWindow(noteId uint) {
 		//btnLabel = "Unpin"
 	}
 
-	PinBtn = widget.NewButtonWithIcon("", btnIcon, func() {
-		var res int64
-		var err error = nil
-		if noteInfo.Pinned {
-			if noteInfo.NewNote {
-				//new note that hasn't been saved yet'
-				res = 1
-			} else {
-				res, err = scribedb.UnpinNote(noteInfo.Id)
-			}
-
-			if err == nil && res == 1 {
-				noteInfo.Pinned = false
-				if PinBtn != nil {
-					PinBtn.SetIcon(theme.RadioButtonIcon())
-					PinBtn.Refresh()
-				}
-			}
-		} else {
-			if noteInfo.Id == 0 {
-				//new note that hasn't been saved yet'
-				res = 1
-			} else {
-				res, err = scribedb.PinNote(noteInfo.Id)
-			}
-			if err == nil && res == 1 {
-				noteInfo.Pinned = true
-				if PinBtn != nil {
-					PinBtn.SetIcon(theme.RadioButtonCheckedIcon())
-					PinBtn.Refresh()
-				}
-			}
-		}
-
-		if AppStatus.currentView == VIEW_PINNED {
-			UpdateView() //updates view on main window
-		}
-
+	NoteWidgets.pinButton = widget.NewButtonWithIcon("", btnIcon, func() {
+		PinNote(&noteInfo)
 	})
 
 	//changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
@@ -168,56 +142,31 @@ func OpenNoteWindow(noteId uint) {
 		picker.Show()
 	})
 
-	deleteBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-		dialog.ShowConfirm("Delete note", "Are you sure?", func(confirm bool) {
-			if confirm {
-				var res int64
-				var err error = nil
-				if noteInfo.NewNote {
-					res = 1
-				} else {
-					res, err = scribedb.DeleteNote(noteInfo.Id)
-				}
-
-				if res == 0 || err != nil {
-					log.Println("Error deleting note - panic!")
-					log.Panicln(err)
-				} else {
-					noteInfo.Deleted = true
-					noteWindow.Close()
-				}
-			}
-		}, noteWindow)
+	NoteWidgets.deleteButton = widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+		DeleteNote(&noteInfo)
 	})
-	deleteBtn.Hide()
 
-	modeWidget := widget.NewRadioGroup([]string{"Edit", "View"}, func(value string) {
+	NoteWidgets.deleteButton.Hide()
+
+	NoteWidgets.modeSelect = widget.NewRadioGroup([]string{EDIT_MODE, VIEW_MODE}, func(value string) {
 		switch value {
-		case "Edit":
-			markdownText.Hide()
-			markdown.Hide()
-			deleteBtn.Show()
-			noteWindow.Canvas().Focus(entry) //this seems to make no difference!!!
-			entry.Show()
-		case "View":
-			entry.Hide()
-			deleteBtn.Hide()
-			markdownText.ParseMarkdown(entry.Text)
-			markdownText.Show()
-			markdown.Show()
+		case EDIT_MODE:
+			SetEditMode()
+		case VIEW_MODE:
+			SetViewMode()
 		}
 	})
 
-	modeWidget.SetSelected("View")
-	modeWidget.Horizontal = true
-	toolbar := container.NewHBox(modeWidget, spacerLabel, PinBtn, colourButton, changeNotebookBtn, deleteBtn)
+	NoteWidgets.modeSelect.SetSelected("View")
+	NoteWidgets.modeSelect.Horizontal = true
+	toolbar := container.NewHBox(NoteWidgets.modeSelect, spacerLabel, NoteWidgets.pinButton, colourButton, changeNotebookBtn, NoteWidgets.deleteButton)
 	win = container.NewBorder(toolbar, nil, nil, nil, content)
 
 	noteWindow.SetContent(win)
-	noteWindow.Canvas().Focus(entry)
+	noteWindow.Canvas().Focus(NoteWidgets.entry)
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
-		noteInfo.Content = entry.Text
+		noteInfo.Content = NoteWidgets.entry.Text
 		var noteChanges note.NoteChanges
 		if noteInfo.NewNote {
 			if noteInfo.Content != "" {
@@ -261,6 +210,8 @@ func OpenNoteWindow(noteId uint) {
 		}
 
 	})
+
+	AddNoteKeyboardShortcuts()
 	noteWindow.Show()
 }
 
@@ -324,4 +275,116 @@ func NewChangeNotebookButton(noteInfo *note.NoteInfo) *widget.Button {
 	})
 
 	return changeNotebookBtn
+}
+
+func DeleteNote(noteInfo *note.NoteInfo) {
+	dialog.ShowConfirm("Delete note", "Are you sure?", func(confirm bool) {
+		if confirm {
+			var res int64
+			var err error = nil
+			if noteInfo.NewNote {
+				res = 1
+			} else {
+				res, err = scribedb.DeleteNote(noteInfo.Id)
+			}
+
+			if res == 0 || err != nil {
+				log.Println("Error deleting note - panic!")
+				log.Panicln(err)
+			} else {
+				noteInfo.Deleted = true
+				noteWindow.Close()
+			}
+		}
+	}, noteWindow)
+}
+
+func PinNote(noteInfo *note.NoteInfo) {
+	var res int64
+	var err error = nil
+	if noteInfo.Pinned {
+		if noteInfo.NewNote {
+			//new note that hasn't been saved yet'
+			res = 1
+		} else {
+			res, err = scribedb.UnpinNote(noteInfo.Id)
+		}
+
+		if err == nil && res == 1 {
+			noteInfo.Pinned = false
+			if NoteWidgets.pinButton != nil {
+				NoteWidgets.pinButton.SetIcon(theme.RadioButtonIcon())
+				NoteWidgets.pinButton.Refresh()
+			}
+		}
+	} else {
+		if noteInfo.Id == 0 {
+			//new note that hasn't been saved yet'
+			res = 1
+		} else {
+			res, err = scribedb.PinNote(noteInfo.Id)
+		}
+		if err == nil && res == 1 {
+			noteInfo.Pinned = true
+			if NoteWidgets.pinButton != nil {
+				NoteWidgets.pinButton.SetIcon(theme.RadioButtonCheckedIcon())
+				NoteWidgets.pinButton.Refresh()
+			}
+		}
+	}
+
+	if AppStatus.currentView == VIEW_PINNED {
+		UpdateView() //updates view on main window
+	}
+}
+
+func SetEditMode() {
+	NoteWidgets.markdownText.Hide()
+	NoteContainers.markdown.Hide()
+	NoteWidgets.deleteButton.Show()
+	noteWindow.Canvas().Focus(NoteWidgets.entry) //this seems to make no difference!!!
+	NoteWidgets.modeSelect.SetSelected(EDIT_MODE)
+	NoteWidgets.entry.Show()
+	//noteWindow.Content().Refresh()
+}
+
+func SetViewMode() {
+	NoteWidgets.entry.Hide()
+	NoteWidgets.deleteButton.Hide()
+	NoteWidgets.markdownText.ParseMarkdown(NoteWidgets.entry.Text)
+	NoteWidgets.markdownText.Show()
+	NoteWidgets.modeSelect.SetSelected(VIEW_MODE)
+	noteWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
+	NoteContainers.markdown.Show()
+}
+
+func AddNoteKeyboardShortcuts() {
+	//Keyboard shortcut to set edit mode
+	ctrl_e := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyE,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	noteWindow.Canvas().AddShortcut(ctrl_e, func(shortcut fyne.Shortcut) {
+		SetEditMode()
+	})
+
+	//Keyboard shortcut to set view mode
+	/*escp := &desktop.CustomShortcut{
+		KeyName: fyne.KeyEscape,
+	}
+
+	noteWindow.Canvas().AddShortcut(escp, func(shortcut fyne.Shortcut) {
+		SetViewMode()
+	})*/
+
+	//Keyboard shortcut to set view mode
+	ctrl_q := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyQ,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	noteWindow.Canvas().AddShortcut(ctrl_q, func(shortcut fyne.Shortcut) {
+		SetViewMode()
+	})
 }

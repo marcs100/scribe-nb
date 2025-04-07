@@ -52,6 +52,7 @@ func (pv *PageViewStatus) GetGridLabelText() string {
 	return fmt.Sprintf("Showing: %d to %d of %d", pv.CurrentPage, pageRange, pv.NumberOfPages)
 }
 
+// containers for main window
 type ApplicationContainers struct {
 	grid              *fyne.Container
 	singleNoteStack   *fyne.Container
@@ -61,6 +62,7 @@ type ApplicationContainers struct {
 	searchPanel       *fyne.Container
 }
 
+// widgets for main window
 type ApplicationWidgets struct {
 	toolbar            *widget.Toolbar
 	singleNotePage     *widget.RichText
@@ -80,6 +82,20 @@ type ApplicationStatus struct {
 	openNotes       []uint //maintain a list of notes that are currently open
 	noteSize        fyne.Size
 	searchFilter    scribedb.SearchFilter
+}
+
+// widgets for note window
+type NoteWindowWidgets struct {
+	pinButton    *widget.Button
+	markdownText *widget.RichText
+	deleteButton *widget.Button
+	entry        *EntryCustom
+	//entry      *widget.Entry
+	modeSelect *widget.RadioGroup
+}
+
+type NoteWindowContainers struct {
+	markdown *fyne.Container
 }
 
 type AppColours struct {

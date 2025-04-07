@@ -24,11 +24,18 @@ const (
 	SEARCH_FILT_WOLE_WORDS string = "Whole words only"
 )
 
+const (
+	EDIT_MODE string = "Edit"
+	VIEW_MODE string = "View"
+)
+
 var mainApp fyne.App
 var mainWindow fyne.Window
-var AppContainers ApplicationContainers //structure containing pointers to fyne containers
-var AppWidgets ApplicationWidgets       //structure containing pointers to fyne widgets
-var PageView PageViewStatus             // structure to track page numbers
-var AppStatus ApplicationStatus         // structure containing various app status
+var AppContainers ApplicationContainers //structure containing pointers to fyne containers for main window
+var NoteContainers NoteWindowContainers //structure containing poineters to fyne containers for note window
+var AppWidgets ApplicationWidgets       //structure containing pointers to fyne widgets for main window
+var NoteWidgets NoteWindowWidgets       //structure containing pointers to fyne widgets for note window
+var PageView PageViewStatus             //structure to track page numbers
+var AppStatus ApplicationStatus         //structure containing various app status
 var Conf *config.Config
 var AppTheme AppColours
