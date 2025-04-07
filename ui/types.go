@@ -6,6 +6,7 @@ import (
 	"scribe-nb/scribedb"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
@@ -96,6 +97,10 @@ type NoteWindowWidgets struct {
 
 type NoteWindowContainers struct {
 	markdown *fyne.Container
+}
+
+type NoteWindowCanvas struct {
+	noteBackground *canvas.Rectangle
 }
 
 type AppColours struct {

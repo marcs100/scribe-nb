@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"fmt"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -38,7 +38,7 @@ func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
 	var ok bool
 	if cs, ok = s.(*desktop.CustomShortcut); !ok {
 		m.Entry.TypedShortcut(s)
-		fmt.Println("error reveing shortcut")
+		log.Println("error reveivng shortcut")
 		return
 	}
 
@@ -46,13 +46,9 @@ func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
 		if m.onShortCut != nil {
 			m.onShortCut()
 		} else {
-			fmt.Println("could not set onShortcut")
+			log.Println("could not set onShortcut")
 		}
 		return
-	} else {
-		fmt.Println("Shortcut did not match")
-		fmt.Println(m.custShortcut)
-		fmt.Println(cs)
 	}
 }
 

@@ -93,12 +93,12 @@ func OpenNoteWindow(noteId uint) {
 	themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
 	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
 
-	noteBackground := canvas.NewRectangle(noteColour)
+	NoteCanvas.noteBackground = canvas.NewRectangle(noteColour)
 	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" {
-		noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
+		NoteCanvas.noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 	}
 
-	colourStack := container.NewStack(noteBackground)
+	colourStack := container.NewStack(NoteCanvas.noteBackground)
 
 	NoteWidgets.markdownText = widget.NewRichTextFromMarkdown(noteInfo.Content)
 	NoteWidgets.markdownText.Wrapping = fyne.TextWrapWord
@@ -128,18 +128,7 @@ func OpenNoteWindow(noteId uint) {
 	changeNotebookBtn := NewChangeNotebookButton(&noteInfo)
 
 	colourButton := widget.NewButtonWithIcon("", theme.ColorPaletteIcon(), func() {
-		picker := dialog.NewColorPicker("Note Color", "Pick colour", func(c color.Color) {
-			fmt.Println(c)
-			hex := FyneColourToRGBHex(c)
-			noteInfo.Colour = fmt.Sprintf("%s%s", "#", hex)
-			noteColour, err = RGBStringToFyneColor(fmt.Sprintf("%s%s", "#", hex))
-			if err != nil {
-				log.Panicln(err)
-			}
-			noteBackground.FillColor = c
-		}, noteWindow)
-		picker.Advanced = true
-		picker.Show()
+		ChangeNoteColour(&noteInfo)
 	})
 
 	NoteWidgets.deleteButton = widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
@@ -211,7 +200,7 @@ func OpenNoteWindow(noteId uint) {
 
 	})
 
-	AddNoteKeyboardShortcuts()
+	AddNoteKeyboardShortcuts(&noteInfo)
 	noteWindow.Show()
 }
 
@@ -358,7 +347,22 @@ func SetViewMode() {
 	NoteContainers.markdown.Show()
 }
 
-func AddNoteKeyboardShortcuts() {
+func ChangeNoteColour(noteInfo *note.NoteInfo) {
+	picker := dialog.NewColorPicker("Note Color", "Pick colour", func(c color.Color) {
+		fmt.Println(c)
+		hex := FyneColourToRGBHex(c)
+		noteInfo.Colour = fmt.Sprintf("%s%s", "#", hex)
+		//noteColour, err := RGBStringToFyneColor(fmt.Sprintf("%s%s", "#", hex))
+		//if err != nil {
+		//	log.Panicln(err)
+		//}
+		NoteCanvas.noteBackground.FillColor = c
+	}, noteWindow)
+	picker.Advanced = true
+	picker.Show()
+}
+
+func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo) {
 	//Keyboard shortcut to set edit mode
 	ctrl_e := &desktop.CustomShortcut{
 		KeyName:  fyne.KeyE,
@@ -370,15 +374,6 @@ func AddNoteKeyboardShortcuts() {
 	})
 
 	//Keyboard shortcut to set view mode
-	/*escp := &desktop.CustomShortcut{
-		KeyName: fyne.KeyEscape,
-	}
-
-	noteWindow.Canvas().AddShortcut(escp, func(shortcut fyne.Shortcut) {
-		SetViewMode()
-	})*/
-
-	//Keyboard shortcut to set view mode
 	ctrl_q := &desktop.CustomShortcut{
 		KeyName:  fyne.KeyQ,
 		Modifier: fyne.KeyModifierControl,
@@ -387,4 +382,25 @@ func AddNoteKeyboardShortcuts() {
 	noteWindow.Canvas().AddShortcut(ctrl_q, func(shortcut fyne.Shortcut) {
 		SetViewMode()
 	})
+
+	//Keyboard shortcut to pin/unpin notes
+	ctrl_p := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyP,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	noteWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
+		PinNote(noteInfo)
+	})
+
+	//Keyboard shortcut to change note colour
+	ctrl_h := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyH,
+		Modifier: fyne.KeyModifierControl,
+	}
+
+	noteWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
+		ChangeNoteColour(noteInfo)
+	})
+
 }
