@@ -7,6 +7,7 @@ type NoteData struct {
 	Created          string
 	Modified         string
 	Pinned           uint
+	PinnedDate       string
 	BackgroundColour string
 }
 

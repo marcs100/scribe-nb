@@ -144,6 +144,10 @@ func OpenNoteWindow(noteId uint) {
 			}
 		}
 
+		if AppStatus.currentView == VIEW_PINNED {
+			UpdateView() //updates view on main window
+		}
+
 	})
 
 	//changeNotebookBtn := NewButtonWithPos("Change Notebook", func(e *fyne.PointEvent){
@@ -176,7 +180,8 @@ func OpenNoteWindow(noteId uint) {
 				}
 
 				if res == 0 || err != nil {
-					log.Println("Error deleing notes")
+					log.Println("Error deleting note - panic!")
+					log.Panicln(err)
 				} else {
 					noteInfo.Deleted = true
 					noteWindow.Close()
@@ -213,16 +218,16 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
 		noteInfo.Content = entry.Text
-		var contentChanged, paramsChanged bool = false, false
+		var noteChanges note.NoteChanges
 		if noteInfo.NewNote {
 			if noteInfo.Content != "" {
-				contentChanged = true
+				noteChanges.ContentChanged = true
 			}
 		} else {
-			contentChanged, paramsChanged = note.CheckChanges(&retrievedNote, &noteInfo)
+			noteChanges = note.CheckChanges(&retrievedNote, &noteInfo)
 		}
 		//if contentChanged{
-		if contentChanged || paramsChanged {
+		if noteChanges.ContentChanged || noteChanges.ParamsChanged {
 			res, err := note.SaveNote(&noteInfo)
 			if err != nil {
 				log.Println("Error saving note")
@@ -235,21 +240,21 @@ func OpenNoteWindow(noteId uint) {
 				log.Println("....Note updates successfully....")
 				go UpdateView()
 			}
-		}
-		/*} else if paramsChanged{
+		} else if noteChanges.PinStatusChanged {
+			// we do not want a create or modified time stamp for just pinning/unpinning notes
 			res, err := note.SaveNoteNoTimeStamp(&noteInfo)
-			if err != nil{
+			if err != nil {
 				log.Println("Error saving note")
 				log.Panic()
 			}
 
-			if res == 0{
+			if res == 0 {
 				log.Println("No note was saved (affected rows = 0)")
-			}else{
+			} else {
 				log.Println("....Note updates successfully....")
 				go UpdateView()
 			}
-		} */
+		}
 
 		if index := slices.Index(AppStatus.openNotes, noteInfo.Id); index != -1 {
 			AppStatus.openNotes = slices.Delete(AppStatus.openNotes, index, index+1)

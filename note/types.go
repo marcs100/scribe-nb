@@ -1,20 +1,21 @@
 package note
 
-import (
-
-)
-
-type NoteInfo struct{
-	Id uint
-	NewNote bool
-	Notebook string
-	Pinned bool
-	Colour string
-	DateCreated string
+type NoteInfo struct {
+	Id           uint
+	NewNote      bool
+	Notebook     string
+	Pinned       bool
+	PinnedDate   string
+	Colour       string
+	DateCreated  string
 	DateModified string
-	Content string
-	Hash string
-	Deleted bool
+	Content      string
+	Hash         string
+	Deleted      bool
 }
 
-
+type NoteChanges struct {
+	ContentChanged   bool
+	ParamsChanged    bool
+	PinStatusChanged bool
+}

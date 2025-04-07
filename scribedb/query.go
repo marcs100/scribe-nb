@@ -18,7 +18,7 @@ func GetNote(id uint) (NoteData, error) {
 }
 
 func GetPinnedNotes() ([]NoteData, error) {
-	var query string = "select * from notes where pinned = 1 order by modified desc"
+	var query string = "select * from notes where pinned = 1 order by pinnedDate desc"
 	return getNotes(query)
 }
 
@@ -90,7 +90,7 @@ func getNotes(query string) ([]NoteData, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var note NoteData
-		err := rows.Scan(&note.Id, &note.Notebook, &note.Content, &note.Created, &note.Modified, &note.Pinned, &note.BackgroundColour)
+		err := rows.Scan(&note.Id, &note.Notebook, &note.Content, &note.Created, &note.Modified, &note.Pinned, &note.BackgroundColour, &note.PinnedDate)
 
 		if err != nil {
 			return nil, err
@@ -148,7 +148,7 @@ func getSearchResults(searchText string, filter SearchFilter) ([]NoteData, error
 	defer rows.Close()
 	for rows.Next() {
 		var note NoteData
-		err := rows.Scan(&note.Id, &note.Notebook, &note.Content, &note.Created, &note.Modified, &note.Pinned, &note.BackgroundColour)
+		err := rows.Scan(&note.Id, &note.Notebook, &note.Content, &note.Created, &note.Modified, &note.Pinned, &note.BackgroundColour, &note.PinnedDate)
 
 		if err != nil {
 			return nil, err
