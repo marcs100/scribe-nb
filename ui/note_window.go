@@ -331,9 +331,9 @@ func SetEditMode() {
 	NoteWidgets.markdownText.Hide()
 	NoteContainers.markdown.Hide()
 	NoteWidgets.deleteButton.Show()
-	noteWindow.Canvas().Focus(NoteWidgets.entry) //this seems to make no difference!!!
 	NoteWidgets.modeSelect.SetSelected(EDIT_MODE)
 	NoteWidgets.entry.Show()
+	noteWindow.Canvas().Focus(NoteWidgets.entry) //this seems to make no difference!!!
 	//noteWindow.Content().Refresh()
 }
 
