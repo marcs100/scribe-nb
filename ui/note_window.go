@@ -44,6 +44,7 @@ func OpenNoteWindow(noteId uint) {
 
 		if err != nil {
 			log.Println("error getting note")
+			dialog.ShowError(err, noteWindow)
 			log.Panic(err)
 		}
 
@@ -169,7 +170,8 @@ func OpenNoteWindow(noteId uint) {
 			res, err := note.SaveNote(&noteInfo)
 			if err != nil {
 				log.Println("Error saving note")
-				log.Panic()
+				dialog.ShowError(err, mainWindow)
+				//log.Panic()
 			}
 
 			if res == 0 {
@@ -183,7 +185,8 @@ func OpenNoteWindow(noteId uint) {
 			res, err := note.SaveNoteNoTimeStamp(&noteInfo)
 			if err != nil {
 				log.Println("Error saving note")
-				log.Panic()
+				dialog.ShowError(err, mainWindow)
+				//log.Panic()
 			}
 
 			if res == 0 {
@@ -210,6 +213,7 @@ func NewChangeNotebookButton(noteInfo *note.NoteInfo) *widget.Button {
 		var err error
 		if notebooks, err = scribedb.GetNotebooks(); err != nil {
 			log.Println("Error getting notebook")
+			dialog.ShowError(err, mainWindow)
 			log.Panicln(err)
 		}
 		nbMenu := fyne.NewMenu("Select Notebook")
@@ -231,11 +235,13 @@ func NewChangeNotebookButton(noteInfo *note.NoteInfo) *widget.Button {
 							_, err = note.SaveNote(noteInfo)
 							if err != nil {
 								log.Print("Error saving note: ")
-								log.Panic(err)
+								dialog.ShowError(err, mainWindow)
+								//log.Panic(err)
 							}
 							UpdateNotebooksList()
 						}
 					} else {
+						dialog.ShowError(err, mainWindow)
 						log.Panicln(fmt.Sprintf("Error check notebook exists: %s", err))
 					}
 				}
@@ -279,7 +285,8 @@ func DeleteNote(noteInfo *note.NoteInfo) {
 
 			if res == 0 || err != nil {
 				log.Println("Error deleting note - panic!")
-				log.Panicln(err)
+				dialog.ShowError(err, mainWindow)
+				//log.Panicln(err)
 			} else {
 				noteInfo.Deleted = true
 				noteWindow.Close()
@@ -402,5 +409,4 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo) {
 	noteWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo)
 	})
-
 }

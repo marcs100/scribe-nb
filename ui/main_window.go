@@ -178,6 +178,7 @@ func CreateSidePanel() *fyne.Container {
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting pinned notes: ")
+			dialog.ShowError(err, mainWindow)
 			log.Panic(err)
 		}
 	})
@@ -190,6 +191,7 @@ func CreateSidePanel() *fyne.Container {
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting recent notes: ")
+			dialog.ShowError(err, mainWindow)
 			log.Panic(err)
 		}
 	})
@@ -232,7 +234,8 @@ func CreateSearchPanel() *fyne.Container {
 		var err error = UpdateView()
 		if err != nil {
 			log.Print("Error getting search results (after setting filter): ")
-			log.Panic(err)
+			dialog.ShowError(err, mainWindow)
+			//log.Panic(err)
 		}
 	})
 	searchLabel := widget.NewLabel("               Search:               ")
@@ -243,6 +246,7 @@ func CreateSearchPanel() *fyne.Container {
 		mainWindow.Canvas().Unfocus() //unfocuses entry to allow keyboard shortcits ro work
 		if err != nil {
 			log.Print("Error getting search results: ")
+			dialog.ShowError(err, mainWindow)
 			log.Panic(err)
 		}
 
@@ -321,6 +325,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 
 	if err != nil {
 		log.Println("error getting note")
+		dialog.ShowError(err, mainWindow)
 		log.Panic(err)
 	}
 
@@ -433,6 +438,7 @@ func CreateNotebooksList() {
 	AppStatus.notebooks, err = scribedb.GetNotebooks()
 	if err != nil {
 		log.Print("Error getting Notebooks: ")
+		dialog.ShowError(err, mainWindow)
 		log.Panic(err)
 	}
 	AppWidgets.notebooksList = widget.NewList(
@@ -463,6 +469,7 @@ func UpdateNotebooksList() {
 	AppStatus.notebooks, err = scribedb.GetNotebooks()
 	if err != nil {
 		log.Print("Error getting Notebooks: ")
+		dialog.ShowError(err, mainWindow)
 		log.Panic(err)
 	}
 	AppWidgets.notebooksList.Refresh()
@@ -520,6 +527,7 @@ func AddMainKeyboardShortcuts() {
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting pinned notes: ")
+			dialog.ShowError(err, mainWindow)
 			log.Panic(err)
 		}
 	})
@@ -536,6 +544,7 @@ func AddMainKeyboardShortcuts() {
 		err = UpdateView()
 		if err != nil {
 			log.Print("Error getting recent notes: ")
+			dialog.ShowError(err, mainWindow)
 			log.Panic(err)
 		}
 	})
