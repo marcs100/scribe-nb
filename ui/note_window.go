@@ -204,6 +204,11 @@ func OpenNoteWindow(noteId uint) {
 	})
 
 	AddNoteKeyboardShortcuts(&noteInfo)
+
+	if noteInfo.NewNote {
+		SetEditMode()
+	}
+
 	noteWindow.Show()
 }
 
