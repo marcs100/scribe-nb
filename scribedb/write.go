@@ -59,6 +59,9 @@ func InsertNote(notebook string, content string, pinned uint, pinnedDate string,
 	//calculate date created and modified
 	var created = time.Now().String()[0:19]
 	var modified = created
+	if pinned > 0 {
+		pinnedDate = time.Now().String()[0:19]
+	}
 
 	res, err := db.Exec("INSERT INTO notes VALUES(NULL,?,?,?,?,?,?,?)", notebook, content, created, modified, pinned, colour, pinnedDate)
 	rows, _ := res.RowsAffected()

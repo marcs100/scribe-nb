@@ -301,6 +301,7 @@ func PinNote(noteInfo *note.NoteInfo) {
 	if noteInfo.Pinned {
 		if noteInfo.NewNote {
 			//new note that hasn't been saved yet'
+			noteInfo.Pinned = false
 			res = 1
 		} else {
 			res, err = scribedb.UnpinNote(noteInfo.Id)
@@ -316,6 +317,7 @@ func PinNote(noteInfo *note.NoteInfo) {
 	} else {
 		if noteInfo.Id == 0 {
 			//new note that hasn't been saved yet'
+			noteInfo.Pinned = true
 			res = 1
 		} else {
 			res, err = scribedb.PinNote(noteInfo.Id)
