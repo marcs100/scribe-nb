@@ -147,10 +147,21 @@ func OpenNoteWindow(noteId uint) {
 		}
 	})
 
+	//Experimenting with preoperties side panel for notes
+	col, _ := RGBStringToFyneColor("#0670f3")
+	borderColour := canvas.NewRectangle(col)
+	//themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
+	propertiesColStack := container.NewStack(borderColour)
+	propertiesTitle := widget.NewRichTextFromMarkdown("**Properties**")
+	propertiesText := widget.NewRichTextWithText("\nnote id: 00\n\ncreated:\n  01/01/2099")
+	propertiesPadded := container.NewPadded(themeBackground, propertiesTitle, propertiesText)
+	propertiesStack := container.NewStack(propertiesColStack, propertiesPadded)
+	//*******************************************************
+
 	NoteWidgets.modeSelect.SetSelected("View")
 	NoteWidgets.modeSelect.Horizontal = true
 	toolbar := container.NewHBox(NoteWidgets.modeSelect, spacerLabel, NoteWidgets.pinButton, colourButton, changeNotebookBtn, NoteWidgets.deleteButton)
-	win = container.NewBorder(toolbar, nil, nil, nil, content)
+	win = container.NewBorder(toolbar, nil, nil, propertiesStack, content)
 
 	noteWindow.SetContent(win)
 	noteWindow.Canvas().Focus(NoteWidgets.entry)

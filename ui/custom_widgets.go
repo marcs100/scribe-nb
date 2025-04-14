@@ -61,23 +61,3 @@ func NewEntryCustom(custShortcut *desktop.CustomShortcut, onShortcut func()) *En
 	e.onShortCut = onShortcut
 	return e
 }
-
-/*
-type buttonWithPos struct {
-	widget.Button
-	OnTapped func(*fyne.PointEvent)
-}
-
-//Implement onTapped with mouse position for this widget
-func (bn *buttonWithPos) Tapped(e *fyne.PointEvent) {
-	if bn.OnTapped != nil {
-		bn.OnTapped(e)
-	}
-}
-
-func NewButtonWithPos(label string, tapped func(*fyne.PointEvent)) *buttonWithPos {
-	bn := &buttonWithPos{}
-	bn.Text = label
-	bn.OnTapped = tapped
-	return bn
-}*/
