@@ -19,8 +19,6 @@ import (
 	//"github.com/fyne-io/terminal"
 )
 
-var noteWindow fyne.Window
-
 func OpenNoteWindow(noteId uint) {
 	var err error
 	var retrievedNote scribedb.NoteData
@@ -34,6 +32,7 @@ func OpenNoteWindow(noteId uint) {
 			DateCreated:  "",
 			DateModified: "",
 			Pinned:       false,
+			PinnedDate:   "",
 			Colour:       "#FFFFFF",
 			Content:      "",
 			Deleted:      false,
@@ -53,6 +52,7 @@ func OpenNoteWindow(noteId uint) {
 			Notebook:     retrievedNote.Notebook,
 			DateCreated:  retrievedNote.Created,
 			DateModified: retrievedNote.Modified,
+			PinnedDate:   retrievedNote.PinnedDate,
 			Colour:       retrievedNote.BackgroundColour,
 			Content:      retrievedNote.Content,
 			Deleted:      false,
@@ -74,7 +74,7 @@ func OpenNoteWindow(noteId uint) {
 	//calculate initial note content hash
 	note.UpdateHash(&noteInfo)
 
-	noteWindow = mainApp.NewWindow(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+	noteWindow = mainApp.NewWindow(fmt.Sprintf("Notebook: %s", noteInfo.Notebook))
 	noteWindow.Resize(fyne.NewSize(900, 750))
 
 	//NoteWidgets.entry = widget.NewMultiLineEntry()
@@ -95,7 +95,7 @@ func OpenNoteWindow(noteId uint) {
 	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
 
 	NoteCanvas.noteBackground = canvas.NewRectangle(noteColour)
-	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" {
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "#000000" {
 		NoteCanvas.noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 	}
 
@@ -136,6 +136,8 @@ func OpenNoteWindow(noteId uint) {
 		DeleteNote(&noteInfo)
 	})
 
+	propertiesButton := widget.NewButtonWithIcon("", theme.InfoIcon(), func() { ShowProperties(&noteInfo) })
+
 	NoteWidgets.deleteButton.Hide()
 
 	NoteWidgets.modeSelect = widget.NewRadioGroup([]string{EDIT_MODE, VIEW_MODE}, func(value string) {
@@ -148,20 +150,19 @@ func OpenNoteWindow(noteId uint) {
 	})
 
 	//Experimenting with preoperties side panel for notes
-	col, _ := RGBStringToFyneColor("#0670f3")
-	borderColour := canvas.NewRectangle(col)
-	//themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
-	propertiesColStack := container.NewStack(borderColour)
 	propertiesTitle := widget.NewRichTextFromMarkdown("**Properties**")
-	propertiesText := widget.NewRichTextWithText("\nnote id: 00\n\ncreated:\n  01/01/2099")
-	propertiesPadded := container.NewPadded(themeBackground, propertiesTitle, propertiesText)
-	propertiesStack := container.NewStack(propertiesColStack, propertiesPadded)
+	NoteWidgets.propertiesText = widget.NewLabel("")
+	vbox := container.NewVBox(propertiesTitle, NoteWidgets.propertiesText)
+	propertiesPadded := container.NewPadded(themeBackground, vbox)
+	NoteContainers.propertiesPanel = container.NewStack(propertiesPadded)
 	//*******************************************************
 
 	NoteWidgets.modeSelect.SetSelected("View")
 	NoteWidgets.modeSelect.Horizontal = true
-	toolbar := container.NewHBox(NoteWidgets.modeSelect, spacerLabel, NoteWidgets.pinButton, colourButton, changeNotebookBtn, NoteWidgets.deleteButton)
-	win = container.NewBorder(toolbar, nil, nil, propertiesStack, content)
+	toolbar := container.NewHBox(NoteWidgets.modeSelect, spacerLabel, NoteWidgets.pinButton, colourButton, changeNotebookBtn, propertiesButton, NoteWidgets.deleteButton)
+	win = container.NewBorder(toolbar, nil, nil, NoteContainers.propertiesPanel, content)
+
+	NoteContainers.propertiesPanel.Hide()
 
 	noteWindow.SetContent(win)
 	noteWindow.Canvas().Focus(NoteWidgets.entry)
@@ -255,6 +256,7 @@ func NewChangeNotebookButton(noteInfo *note.NoteInfo) *widget.Button {
 								//log.Panic(err)
 							}
 							UpdateNotebooksList()
+							UpdateProperties(noteInfo)
 						}
 					} else {
 						dialog.ShowError(err, mainWindow)
@@ -273,6 +275,7 @@ func NewChangeNotebookButton(noteInfo *note.NoteInfo) *widget.Button {
 				noteInfo.Notebook = notebook
 				//fmt.Println("Change notebook to " + notebook)
 				noteWindow.SetTitle(fmt.Sprintf("Notebook: %s --- Note id: %d", noteInfo.Notebook, noteInfo.Id))
+				UpdateProperties(noteInfo)
 			})
 			nbMenu.Items = append(nbMenu.Items, menuItem)
 		}
@@ -350,6 +353,7 @@ func PinNote(noteInfo *note.NoteInfo) {
 	if AppStatus.currentView == VIEW_PINNED {
 		UpdateView() //updates view on main window
 	}
+	UpdateProperties(noteInfo)
 }
 
 func SetEditMode() {
@@ -385,6 +389,7 @@ func ChangeNoteColour(noteInfo *note.NoteInfo) {
 	}, noteWindow)
 	picker.Advanced = true
 	picker.Show()
+	UpdateProperties(noteInfo)
 }
 
 func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo) {
@@ -427,4 +432,22 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo) {
 	noteWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo)
 	})
+}
+
+func ShowProperties(noteInfo *note.NoteInfo) {
+	if NoteContainers.propertiesPanel.Hidden {
+		text := note.GetPropertiesText(noteInfo)
+		NoteWidgets.propertiesText.SetText(text)
+		NoteContainers.propertiesPanel.Show()
+	} else {
+		NoteContainers.propertiesPanel.Hide()
+	}
+}
+
+func UpdateProperties(noteInfo *note.NoteInfo) {
+	if !NoteContainers.propertiesPanel.Hidden {
+		text := note.GetPropertiesText(noteInfo)
+		NoteWidgets.propertiesText.SetText(text)
+		NoteWidgets.propertiesText.Refresh()
+	}
 }

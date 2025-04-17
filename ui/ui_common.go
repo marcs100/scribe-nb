@@ -31,6 +31,7 @@ const (
 
 var mainApp fyne.App
 var mainWindow fyne.Window
+var noteWindow fyne.Window
 var AppContainers ApplicationContainers //structure containing pointers to fyne containers for main window
 var NoteContainers NoteWindowContainers //structure containing poineters to fyne containers for note window
 var AppWidgets ApplicationWidgets       //structure containing pointers to fyne widgets for main window

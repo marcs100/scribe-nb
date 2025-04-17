@@ -88,3 +88,27 @@ func SaveNoteNoTimeStamp(note *NoteInfo) (int64, error) {
 
 	return res, err
 }
+
+func GetPropertiesText(noteInfo *NoteInfo) string {
+	pinnedDate := noteInfo.PinnedDate
+	var pinnedStat string = "no"
+	if noteInfo.Pinned {
+		pinnedStat = "yes"
+	} else {
+		pinnedDate = "n/a"
+	}
+	created := noteInfo.DateCreated
+	modified := noteInfo.DateModified
+
+	if len(created) > 16 {
+		created = created[:16]
+	}
+	if len(modified) > 16 {
+		modified = modified[:16]
+	}
+	if len(pinnedDate) > 16 {
+		pinnedDate = pinnedDate[:16]
+	}
+	return fmt.Sprintf("note id: %d\r\nnotebook: %s\r\n\r\ncreated:   %s\r\nmodified: %s\r\n\r\npinned: %s\r\ndate pinned: %s\r\n\r\nborder colour: %s",
+		noteInfo.Id, noteInfo.Notebook, created, modified, pinnedStat, pinnedDate, noteInfo.Colour)
+}

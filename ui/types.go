@@ -92,11 +92,13 @@ type NoteWindowWidgets struct {
 	deleteButton *widget.Button
 	entry        *EntryCustom
 	//entry      *widget.Entry
-	modeSelect *widget.RadioGroup
+	modeSelect     *widget.RadioGroup
+	propertiesText *widget.Label
 }
 
 type NoteWindowContainers struct {
-	markdown *fyne.Container
+	markdown        *fyne.Container
+	propertiesPanel *fyne.Container
 }
 
 type NoteWindowCanvas struct {
