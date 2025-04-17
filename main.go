@@ -88,7 +88,7 @@ func CreateAppConfig(homeDir string) config.Config {
 		DarkColourNote:   "#2f2f2f",
 		LightColourNote:  "#e2e2e2",
 		DarkColourBg:     "#1e1e1e",
-		LightColourBg:    "#f4f3fa",
+		LightColourBg:    "#efefef",
 	}
 	newConfig := config.Config{
 		Title:    fmt.Sprintf("Scribe-nb v%s", VERSION),

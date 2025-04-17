@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"fyne.io/fyne/v2/theme"
@@ -15,6 +16,7 @@ func GetThemeColours() AppColours {
 	appColours.NoteBgColour = appColours.MainBgColour
 	switch themeVariant {
 	case theme.VariantDark:
+		fmt.Println("Dark theme detected")
 		appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourBg)
 		if err != nil {
 			log.Panicln(err)
@@ -24,6 +26,7 @@ func GetThemeColours() AppColours {
 			log.Panicln(err)
 		}
 	case theme.VariantLight:
+		fmt.Println("Light theme detected")
 		appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.LightColourBg)
 		if err != nil {
 			log.Panicln(err)
