@@ -343,7 +343,7 @@ func PinNote(noteInfo *note.NoteInfo) {
 			res, err = scribedb.PinNote(noteInfo.Id)
 			pinnedDate, err := scribedb.GetPinnedDate(int(noteInfo.Id))
 			if err != nil {
-				log.Println(fmt.Sprintf("Error getting pinned date: &s", err))
+				log.Println(fmt.Sprintf("Error getting pinned date: %s", err))
 			}
 			noteInfo.PinnedDate = pinnedDate
 		}
