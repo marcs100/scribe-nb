@@ -22,6 +22,17 @@ func GetPinnedNotes() ([]NoteData, error) {
 	return getNotes(query)
 }
 
+func GetPinnedDate(noteId int) (string, error) {
+	var query string = fmt.Sprintf("select pinnedDate from notes where id = %d", noteId)
+	fields, err := getColumn(query)
+	if err == nil && len(fields) == 0 {
+		err = errors.New("No value found in db")
+		return "", err
+	}
+
+	return fields[0], err
+}
+
 func GetNotebook(notebookName string) ([]NoteData, error) {
 	var query string = fmt.Sprintf("select * from notes where notebook = '%s' order by modified desc", notebookName)
 	return getNotes(query)
@@ -57,7 +68,7 @@ func GetSearchResults(searchQuery string, filter SearchFilter) ([]NoteData, erro
 
 //************ Private functions ************************
 
-// use to get a single column as list of strungs
+// use to get a single column as list of strings
 func getColumn(query string) ([]string, error) {
 	if !connected {
 		return nil, errors.New("GetColumn: database not connected")

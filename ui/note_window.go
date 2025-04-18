@@ -328,6 +328,7 @@ func PinNote(noteInfo *note.NoteInfo) {
 
 		if err == nil && res == 1 {
 			noteInfo.Pinned = false
+			noteInfo.PinnedDate = ""
 			if NoteWidgets.pinButton != nil {
 				NoteWidgets.pinButton.SetIcon(theme.RadioButtonIcon())
 				NoteWidgets.pinButton.Refresh()
@@ -340,6 +341,11 @@ func PinNote(noteInfo *note.NoteInfo) {
 			res = 1
 		} else {
 			res, err = scribedb.PinNote(noteInfo.Id)
+			pinnedDate, err := scribedb.GetPinnedDate(int(noteInfo.Id))
+			if err != nil {
+				log.Println(fmt.Sprintf("Error getting pinned date: &s", err))
+			}
+			noteInfo.PinnedDate = pinnedDate
 		}
 		if err == nil && res == 1 {
 			noteInfo.Pinned = true
