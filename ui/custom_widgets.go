@@ -38,7 +38,7 @@ func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
 	var ok bool
 	if cs, ok = s.(*desktop.CustomShortcut); !ok {
 		m.Entry.TypedShortcut(s)
-		log.Println("error reveivng shortcut")
+		log.Println("error receiving shortcut")
 		return
 	}
 
@@ -61,3 +61,23 @@ func NewEntryCustom(custShortcut *desktop.CustomShortcut, onShortcut func()) *En
 	e.onShortCut = onShortcut
 	return e
 }
+
+/*
+type buttonWithPos struct {
+	widget.Button
+	OnTapped func(*fyne.PointEvent)
+}
+
+//Implement onTapped with mouse position for this widget
+func (bn *buttonWithPos) Tapped(e *fyne.PointEvent) {
+	if bn.OnTapped != nil {
+		bn.OnTapped(e)
+	}
+}
+
+func NewButtonWithPos(label string, tapped func(*fyne.PointEvent)) *buttonWithPos {
+	bn := &buttonWithPos{}
+	bn.Text = label
+	bn.OnTapped = tapped
+	return bn
+}*/

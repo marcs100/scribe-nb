@@ -29,6 +29,12 @@ const (
 	VIEW_MODE string = "View"
 )
 
+const (
+	LIGHT_THEME theme_variant = iota
+	DARK_THEME
+	SYSTEM_THEME
+)
+
 var mainApp fyne.App
 var mainWindow fyne.Window
 var noteWindow fyne.Window

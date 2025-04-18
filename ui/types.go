@@ -109,3 +109,5 @@ type AppColours struct {
 	NoteBgColour color.Color
 	MainBgColour color.Color
 }
+
+type theme_variant int

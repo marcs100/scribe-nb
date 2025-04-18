@@ -32,7 +32,17 @@ func CreateMainWindow(version string) {
 
 	AppStatus.noteSize = fyne.NewSize(Conf.Settings.NoteWidth, Conf.Settings.NoteHeight)
 
-	AppTheme = GetThemeColours()
+	var themeVar theme_variant
+	switch Conf.Settings.ThemeVariant {
+	case "light":
+		themeVar = LIGHT_THEME
+	case "dark":
+		themeVar = DARK_THEME
+	case "system":
+		themeVar = SYSTEM_THEME
+	}
+
+	AppTheme = GetThemeColours(themeVar)
 
 	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 
