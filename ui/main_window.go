@@ -367,8 +367,12 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 	textPadded := container.NewPadded(themeBackground, AppWidgets.singleNotePage)
 	noteStack := container.NewStack(colourStack, textPadded)
 
+	win := container.NewInnerWindow("title string", noteStack)
+
 	AppContainers.singleNoteStack.RemoveAll()
-	AppContainers.singleNoteStack.Add(noteStack)
+	//AppContainers.singleNoteStack.Add(noteStack)
+	AppContainers.singleNoteStack.Add(win)
+	win.Show()
 
 	AppContainers.mainPageContainer.Show()
 	//win := container.NewInnerWindow("hello", AppContainers.mainPageContainer)

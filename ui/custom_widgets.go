@@ -62,6 +62,10 @@ func NewEntryCustom(custShortcut *desktop.CustomShortcut, onShortcut func()) *En
 	return e
 }
 
+type BorderCustom struct {
+	//container.border
+}
+
 /*
 type buttonWithPos struct {
 	widget.Button
