@@ -149,13 +149,7 @@ func OpenNoteWindow(noteId uint) {
 		}
 	})
 
-	//Experimenting with preoperties side panel for notes
-	propertiesTitle := widget.NewRichTextFromMarkdown("**Properties**")
-	NoteWidgets.propertiesText = widget.NewLabel("")
-	vbox := container.NewVBox(propertiesTitle, NoteWidgets.propertiesText)
-	propertiesPadded := container.NewPadded(themeBackground, vbox)
-	NoteContainers.propertiesPanel = container.NewStack(propertiesPadded)
-	//*******************************************************
+	NoteContainers.propertiesPanel = NewProperetiesPanel()
 
 	NoteWidgets.modeSelect.SetSelected("View")
 	NoteWidgets.modeSelect.Horizontal = true
@@ -438,22 +432,4 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo) {
 	noteWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo)
 	})
-}
-
-func ShowProperties(noteInfo *note.NoteInfo) {
-	if NoteContainers.propertiesPanel.Hidden {
-		text := note.GetPropertiesText(noteInfo)
-		NoteWidgets.propertiesText.SetText(text)
-		NoteContainers.propertiesPanel.Show()
-	} else {
-		NoteContainers.propertiesPanel.Hide()
-	}
-}
-
-func UpdateProperties(noteInfo *note.NoteInfo) {
-	if !NoteContainers.propertiesPanel.Hidden {
-		text := note.GetPropertiesText(noteInfo)
-		NoteWidgets.propertiesText.SetText(text)
-		NoteWidgets.propertiesText.Refresh()
-	}
 }
