@@ -78,7 +78,7 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	}
 
 	NoteWidgets.entry = NewEntryCustom(ctrl_q, func() {
-		SetViewMode()
+		SetViewMode(parentWindow)
 	})
 
 	//NoteWidgets.entry = widget.NewMultiLineEntry()
@@ -135,9 +135,9 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	NoteWidgets.modeSelect = widget.NewRadioGroup([]string{EDIT_MODE, VIEW_MODE}, func(value string) {
 		switch value {
 		case EDIT_MODE:
-			SetEditMode()
+			SetEditMode(parentWindow)
 		case VIEW_MODE:
-			SetViewMode()
+			SetViewMode(parentWindow)
 		}
 	})
 
@@ -289,23 +289,23 @@ func PinNote(noteInfo *note.NoteInfo) {
 	UpdateProperties(noteInfo)
 }
 
-func SetEditMode() {
+func SetEditMode(parentWindow fyne.Window) {
 	NoteWidgets.markdownText.Hide()
 	NoteContainers.markdown.Hide()
 	NoteWidgets.deleteButton.Show()
 	NoteWidgets.modeSelect.SetSelected(EDIT_MODE)
 	NoteWidgets.entry.Show()
-	//noteWindow.Canvas().Focus(NoteWidgets.entry) //this seems to make no difference!!!
-	//noteWindow.Content().Refresh()
+	parentWindow.Canvas().Focus(NoteWidgets.entry)
+	parentWindow.Content().Refresh()
 }
 
-func SetViewMode() {
+func SetViewMode(parentWindow fyne.Window) {
 	NoteWidgets.entry.Hide()
 	NoteWidgets.deleteButton.Hide()
 	NoteWidgets.markdownText.ParseMarkdown(NoteWidgets.entry.Text)
 	NoteWidgets.markdownText.Show()
 	NoteWidgets.modeSelect.SetSelected(VIEW_MODE)
-	//noteWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
+	parentWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
 	NoteContainers.markdown.Show()
 }
 

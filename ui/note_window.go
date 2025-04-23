@@ -37,46 +37,7 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.Canvas().Focus(NoteWidgets.entry)
 	noteWindow.SetOnClosed(func() {
 		fmt.Println(fmt.Sprintf("Closing note %d", noteInfo.Id))
-		noteInfo.Content = NoteWidgets.entry.Text
-		var noteChanges note.NoteChanges
-		if noteInfo.NewNote {
-			if noteInfo.Content != "" {
-				noteChanges.ContentChanged = true
-			}
-		} else {
-			noteChanges = note.CheckChanges(&retrievedNote, &noteInfo)
-		}
-		//if contentChanged{
-		if noteChanges.ContentChanged || noteChanges.ParamsChanged {
-			res, err := note.SaveNote(&noteInfo)
-			if err != nil {
-				log.Println("Error saving note")
-				dialog.ShowError(err, mainWindow)
-				//log.Panic()
-			}
-
-			if res == 0 {
-				log.Println("No note was saved (affected rows = 0)")
-			} else {
-				log.Println("....Note updates successfully....")
-				go UpdateView()
-			}
-		} else if noteChanges.PinStatusChanged {
-			// we do not want a create or modified time stamp for just pinning/unpinning notes
-			res, err := note.SaveNoteNoTimeStamp(&noteInfo)
-			if err != nil {
-				log.Println("Error saving note")
-				dialog.ShowError(err, mainWindow)
-				//log.Panic()
-			}
-
-			if res == 0 {
-				log.Println("No note was saved (affected rows = 0)")
-			} else {
-				log.Println("....Note updates successfully....")
-				go UpdateView()
-			}
-		}
+		SaveNote(&noteInfo, &retrievedNote)
 
 		if index := slices.Index(AppStatus.openNotes, noteInfo.Id); index != -1 {
 			AppStatus.openNotes = slices.Delete(AppStatus.openNotes, index, index+1)
@@ -87,7 +48,7 @@ func OpenNoteWindow(noteId uint) {
 	AddNoteKeyboardShortcuts(&noteInfo, noteWindow)
 
 	if noteInfo.NewNote {
-		SetEditMode()
+		SetEditMode(noteWindow)
 	}
 
 	noteWindow.Show()
@@ -101,7 +62,7 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window)
 	}
 
 	parentWindow.Canvas().AddShortcut(ctrl_e, func(shortcut fyne.Shortcut) {
-		SetEditMode()
+		SetEditMode(parentWindow)
 	})
 
 	//Keyboard shortcut to set view mode
@@ -111,7 +72,7 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window)
 	}
 
 	parentWindow.Canvas().AddShortcut(ctrl_q, func(shortcut fyne.Shortcut) {
-		SetViewMode()
+		SetViewMode(parentWindow)
 	})
 
 	//Keyboard shortcut to pin/unpin notes
@@ -133,4 +94,47 @@ func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window)
 	parentWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo, parentWindow)
 	})
+}
+
+func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
+	noteInfo.Content = NoteWidgets.entry.Text
+	var noteChanges note.NoteChanges
+	if noteInfo.NewNote {
+		if noteInfo.Content != "" {
+			noteChanges.ContentChanged = true
+		}
+	} else {
+		noteChanges = note.CheckChanges(retrievedNote, noteInfo)
+	}
+	//if contentChanged{
+	if noteChanges.ContentChanged || noteChanges.ParamsChanged {
+		res, err := note.SaveNote(noteInfo)
+		if err != nil {
+			log.Println("Error saving note")
+			dialog.ShowError(err, mainWindow)
+			//log.Panic()
+		}
+
+		if res == 0 {
+			log.Println("No note was saved (affected rows = 0)")
+		} else {
+			log.Println("....Note updates successfully....")
+			go UpdateView()
+		}
+	} else if noteChanges.PinStatusChanged {
+		// we do not want a create or modified time stamp for just pinning/unpinning notes
+		res, err := note.SaveNoteNoTimeStamp(noteInfo)
+		if err != nil {
+			log.Println("Error saving note")
+			dialog.ShowError(err, mainWindow)
+			//log.Panic()
+		}
+
+		if res == 0 {
+			log.Println("No note was saved (affected rows = 0)")
+		} else {
+			log.Println("....Note updates successfully....")
+			go UpdateView()
+		}
+	}
 }

@@ -321,6 +321,10 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
 }
 
 func ShowNotesAsPages(notes []scribedb.NoteData) {
+	var noteInfo note.NoteInfo
+	var retrievedNote scribedb.NoteData
+	var err error
+
 	if AppContainers.mainGridContainer != nil {
 		AppContainers.mainGridContainer.Hide()
 	}
@@ -331,54 +335,26 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 		PageView.CurrentPage = 1
 	}
 
-	retreievdNote, err := scribedb.GetNote(notes[PageView.CurrentPage-1].Id)
-
-	if err != nil {
-		log.Println("error getting note")
-		dialog.ShowError(err, mainWindow)
-		log.Panic(err)
-	}
-
-	noteInfo := note.NoteInfo{
-		Id:           retreievdNote.Id,
-		Notebook:     retreievdNote.Notebook,
-		DateCreated:  retreievdNote.Created,
-		DateModified: retreievdNote.Modified,
-		Colour:       retreievdNote.BackgroundColour,
-		Content:      retreievdNote.Content,
-		Deleted:      false,
-	}
+	var noteId = notes[PageView.CurrentPage-1].Id
 
 	AppWidgets.pageLabel.SetText(PageView.GetLabelText())
 	AppWidgets.pageLabel.Show()
 
-	AppWidgets.singleNotePage.ParseMarkdown(noteInfo.Content)
-	AppWidgets.singleNotePage.Wrapping = fyne.TextWrapWord
-	AppWidgets.singleNotePage.Refresh()
+	AppContainers.singleNoteStack.RemoveAll()
 
-	themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
-	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
-	noteBackground := canvas.NewRectangle(noteColour)
-	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "ffffff" {
-		noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
+	if noteId != 0 {
+		retrievedNote, err = scribedb.GetNote(noteId)
+		if err != nil {
+			dialog.ShowError(err, mainWindow)
+			log.Panic(err)
+		}
 	}
 
-	colourStack := container.NewStack(noteBackground)
-	textPadded := container.NewPadded(themeBackground, AppWidgets.singleNotePage)
-	noteStack := container.NewStack(colourStack, textPadded)
-
-	win := container.NewInnerWindow("title string", noteStack)
-
-	AppContainers.singleNoteStack.RemoveAll()
-	//AppContainers.singleNoteStack.Add(noteStack)
-	AppContainers.singleNoteStack.Add(win)
-	win.Show()
+	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, mainWindow)
+	AppContainers.singleNoteStack.Add(noteContainer)
 
 	AppContainers.mainPageContainer.Show()
-	//win := container.NewInnerWindow("hello", AppContainers.mainPageContainer)
-	//win.Show()
 	AppContainers.mainPageContainer.Refresh()
-
 }
 
 func UpdateView() error {

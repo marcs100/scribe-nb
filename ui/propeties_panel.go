@@ -25,6 +25,7 @@ func ShowProperties(noteInfo *note.NoteInfo) {
 		NoteContainers.propertiesPanel.Show()
 	} else {
 		NoteContainers.propertiesPanel.Hide()
+		AppContainers.singleNoteStack.Refresh() //only needed for single page view - IMPROVE THIS!!!!!!!
 	}
 }
 
