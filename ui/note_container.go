@@ -293,6 +293,11 @@ func SetEditMode(parentWindow fyne.Window) {
 	NoteWidgets.markdownText.Hide()
 	NoteContainers.markdown.Hide()
 	NoteWidgets.deleteButton.Show()
+	if AppStatus.currentLayout == LAYOUT_PAGE {
+		//Hide page back & forward for edit mode
+		AppWidgets.toolbar.Items[2].ToolbarObject().Hide()
+		AppWidgets.toolbar.Items[3].ToolbarObject().Hide()
+	}
 	NoteWidgets.modeSelect.SetSelected(EDIT_MODE)
 	NoteWidgets.entry.Show()
 	parentWindow.Canvas().Focus(NoteWidgets.entry)
@@ -302,6 +307,11 @@ func SetEditMode(parentWindow fyne.Window) {
 func SetViewMode(parentWindow fyne.Window) {
 	NoteWidgets.entry.Hide()
 	NoteWidgets.deleteButton.Hide()
+	if AppStatus.currentLayout == LAYOUT_PAGE {
+		//Show page back & forward for edit mode
+		AppWidgets.toolbar.Items[2].ToolbarObject().Show()
+		AppWidgets.toolbar.Items[3].ToolbarObject().Show()
+	}
 	NoteWidgets.markdownText.ParseMarkdown(NoteWidgets.entry.Text)
 	NoteWidgets.markdownText.Show()
 	NoteWidgets.modeSelect.SetSelected(VIEW_MODE)
@@ -323,4 +333,47 @@ func ChangeNoteColour(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
 	picker.Advanced = true
 	picker.Show()
 	UpdateProperties(noteInfo)
+}
+
+func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
+	noteInfo.Content = NoteWidgets.entry.Text
+	var noteChanges note.NoteChanges
+	if noteInfo.NewNote {
+		if noteInfo.Content != "" {
+			noteChanges.ContentChanged = true
+		}
+	} else {
+		noteChanges = note.CheckChanges(retrievedNote, noteInfo)
+	}
+	//if contentChanged{
+	if noteChanges.ContentChanged || noteChanges.ParamsChanged {
+		res, err := note.SaveNote(noteInfo)
+		if err != nil {
+			log.Println("Error saving note")
+			dialog.ShowError(err, mainWindow)
+			//log.Panic()
+		}
+
+		if res == 0 {
+			log.Println("No note was saved (affected rows = 0)")
+		} else {
+			log.Println("....Note updates successfully....")
+			go UpdateView()
+		}
+	} else if noteChanges.PinStatusChanged {
+		// we do not want a create or modified time stamp for just pinning/unpinning notes
+		res, err := note.SaveNoteNoTimeStamp(noteInfo)
+		if err != nil {
+			log.Println("Error saving note")
+			dialog.ShowError(err, mainWindow)
+			//log.Panic()
+		}
+
+		if res == 0 {
+			log.Println("No note was saved (affected rows = 0)")
+		} else {
+			log.Println("....Note updates successfully....")
+			go UpdateView()
+		}
+	}
 }
