@@ -501,7 +501,6 @@ func ShowNotebooks() {
 			AppContainers.listPanel.Show()
 		}
 	}
-	PageView.Reset()
 }
 
 func AddMainKeyboardShortcuts() {
