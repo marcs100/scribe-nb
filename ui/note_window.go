@@ -43,7 +43,7 @@ func OpenNoteWindow(noteId uint) {
 		}
 	})
 
-	AddNoteWindowKeyboardShortcuts(&noteInfo, noteWindow)
+	AddNoteKeyboardShortcuts(&noteInfo, noteWindow)
 
 	if noteInfo.NewNote {
 		SetEditMode(noteWindow)
@@ -52,7 +52,7 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.Show()
 }
 
-func AddNoteWindowKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
+func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
 	//Keyboard shortcut to set edit mode
 	parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
 		SetEditMode(parentWindow)
