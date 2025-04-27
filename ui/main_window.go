@@ -352,7 +352,6 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 
 	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, mainWindow)
 	AppContainers.singleNoteStack.Add(noteContainer)
-
 	AppContainers.mainPageContainer.Show()
 	AppContainers.mainPageContainer.Refresh()
 }

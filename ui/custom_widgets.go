@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"log"
+	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -29,36 +29,32 @@ func NewScribeNoteText(content string, tapped func()) *scribeNoteText {
 
 type EntryCustom struct {
 	widget.Entry
-	custShortcut *desktop.CustomShortcut
-	onShortCut   func()
+	onCustomShortCut func(cs *desktop.CustomShortcut)
 }
 
 func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
-	var cs *desktop.CustomShortcut
 	var ok bool
+	var cs *desktop.CustomShortcut
 	if cs, ok = s.(*desktop.CustomShortcut); !ok {
-		m.Entry.TypedShortcut(s)
-		log.Println("error receiving shortcut")
+		//fmt.Printf("shortcut name is %s", cs.ShortcutName())
+		m.Entry.TypedShortcut(s) //not a customshort cut - pass through to normal predifined shortcuts
+		fmt.Println("** Not a custom shortcut!!")
 		return
 	}
-
-	if cs.ShortcutName() == m.custShortcut.ShortcutName() {
-		if m.onShortCut != nil {
-			m.onShortCut()
-		} else {
-			log.Println("could not set onShortcut")
-		}
+	//var name = cs.ShortcutName()
+	if m.onCustomShortCut == nil {
+		fmt.Println("********Error nil ref to m.OnCustomShortcut()********")
 		return
 	}
+	m.onCustomShortCut(cs)
 }
 
-func NewEntryCustom(custShortcut *desktop.CustomShortcut, onShortcut func()) *EntryCustom {
+func NewEntryCustom(onCustomShortcut func(cs *desktop.CustomShortcut)) *EntryCustom {
 	e := &EntryCustom{}
 	e.MultiLine = true
 	e.Wrapping = fyne.TextWrapWord
+	e.onCustomShortCut = onCustomShortcut
 	e.ExtendBaseWidget(e)
-	e.custShortcut = custShortcut
-	e.onShortCut = onShortcut
 	return e
 }
 

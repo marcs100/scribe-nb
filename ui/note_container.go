@@ -77,8 +77,10 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 		Modifier: fyne.KeyModifierControl,
 	}
 
-	NoteWidgets.entry = NewEntryCustom(ctrl_q, func() {
-		SetViewMode(parentWindow)
+	NoteWidgets.entry = NewEntryCustom(func(cs *desktop.CustomShortcut) {
+		if cs.ShortcutName() == ctrl_q.ShortcutName() {
+			SetViewMode(parentWindow)
+		}
 	})
 
 	//NoteWidgets.entry = widget.NewMultiLineEntry()
@@ -315,7 +317,7 @@ func SetViewMode(parentWindow fyne.Window) {
 	NoteWidgets.markdownText.ParseMarkdown(NoteWidgets.entry.Text)
 	NoteWidgets.markdownText.Show()
 	NoteWidgets.modeSelect.SetSelected(VIEW_MODE)
-	parentWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
+	//parentWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
 	NoteContainers.markdown.Show()
 }
 
