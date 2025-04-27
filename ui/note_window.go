@@ -9,7 +9,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/driver/desktop"
 	//"fyne.io/fyne/v2/data/binding"
 	//"github.com/fyne-io/terminal"
 )
@@ -42,10 +41,9 @@ func OpenNoteWindow(noteId uint) {
 		if index := slices.Index(AppStatus.openNotes, noteInfo.Id); index != -1 {
 			AppStatus.openNotes = slices.Delete(AppStatus.openNotes, index, index+1)
 		}
-
 	})
 
-	AddNoteKeyboardShortcuts(&noteInfo, noteWindow)
+	AddNoteWindowKeyboardShortcuts(&noteInfo, noteWindow)
 
 	if noteInfo.NewNote {
 		SetEditMode(noteWindow)
@@ -54,44 +52,24 @@ func OpenNoteWindow(noteId uint) {
 	noteWindow.Show()
 }
 
-func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
+func AddNoteWindowKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
 	//Keyboard shortcut to set edit mode
-	ctrl_e := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyE,
-		Modifier: fyne.KeyModifierControl,
-	}
-
-	parentWindow.Canvas().AddShortcut(ctrl_e, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
 		SetEditMode(parentWindow)
 	})
 
 	//Keyboard shortcut to set view mode
-	ctrl_q := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyQ,
-		Modifier: fyne.KeyModifierControl,
-	}
-
-	parentWindow.Canvas().AddShortcut(ctrl_q, func(shortcut fyne.Shortcut) {
-		SetViewMode(parentWindow)
-	})
+	/*parentWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
+	SetViewMode(parentWindow)
+	})*/
 
 	//Keyboard shortcut to pin/unpin notes
-	ctrl_p := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyP,
-		Modifier: fyne.KeyModifierControl,
-	}
-
-	parentWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(ctrl_shift_p, func(shortcut fyne.Shortcut) {
 		PinNote(noteInfo)
 	})
 
 	//Keyboard shortcut to change note colour
-	ctrl_h := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyH,
-		Modifier: fyne.KeyModifierControl,
-	}
-
-	parentWindow.Canvas().AddShortcut(ctrl_h, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(ctrl_shift_c, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo, parentWindow)
 	})
 }

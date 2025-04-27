@@ -71,15 +71,15 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	//calculate initial note content hash
 	note.UpdateHash(noteInfo)
 
-	//NoteWidgets.entry = widget.NewMultiLineEntry()
-	ctrl_q := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyQ,
-		Modifier: fyne.KeyModifierControl,
-	}
-
+	//setup keyboard shortcuts
 	NoteWidgets.entry = NewEntryCustom(func(cs *desktop.CustomShortcut) {
-		if cs.ShortcutName() == ctrl_q.ShortcutName() {
+		switch cs.ShortcutName() {
+		case ctrl_shift_q.ShortcutName():
 			SetViewMode(parentWindow)
+		case ctrl_shift_p.ShortcutName():
+			PinNote(noteInfo)
+		case ctrl_shift_c.ShortcutName():
+			ChangeNoteColour(noteInfo, parentWindow)
 		}
 	})
 
@@ -98,6 +98,16 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	colourStack := container.NewStack(NoteCanvas.noteBackground)
 
 	NoteWidgets.markdownText = widget.NewRichTextFromMarkdown(noteInfo.Content)
+	/*NoteWidgets.markdownText = NewRichTextFromMarkdownCustom(noteInfo.Content, func(cs *desktop.CustomShortcut) {
+	switch cs.ShortcutName() {
+	case ctrl_e.ShortcutName():
+		SetEditMode(parentWindow)
+	case ctrl_p.ShortcutName():
+		PinNote(noteInfo)
+	case ctrl_h.ShortcutName():
+		ChangeNoteColour(noteInfo, parentWindow)
+	}
+	})*/
 	NoteWidgets.markdownText.Wrapping = fyne.TextWrapWord
 	NoteWidgets.markdownText.Hide()
 	markdownPadded := container.NewPadded(themeBackground, NoteWidgets.markdownText)
@@ -317,7 +327,7 @@ func SetViewMode(parentWindow fyne.Window) {
 	NoteWidgets.markdownText.ParseMarkdown(NoteWidgets.entry.Text)
 	NoteWidgets.markdownText.Show()
 	NoteWidgets.modeSelect.SetSelected(VIEW_MODE)
-	//parentWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
+	parentWindow.Canvas().Focus(nil) // this allows the canvas keyboard shortcuts to work rather than the entry widget shortcuts
 	NoteContainers.markdown.Show()
 }
 

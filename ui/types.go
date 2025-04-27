@@ -89,6 +89,7 @@ type ApplicationStatus struct {
 type NoteWindowWidgets struct {
 	pinButton    *widget.Button
 	markdownText *widget.RichText
+	//markdownText *RichTextFromMarkdownCustom
 	deleteButton *widget.Button
 	entry        *EntryCustom
 	//entry      *widget.Entry

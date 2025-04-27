@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/desktop"
 
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -351,6 +350,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 	}
 
 	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, mainWindow)
+	AddNoteWindowKeyboardShortcuts(&noteInfo, mainWindow)
 	AppContainers.singleNoteStack.Add(noteContainer)
 	AppContainers.mainPageContainer.Show()
 	AppContainers.mainPageContainer.Refresh()
@@ -503,11 +503,15 @@ func ShowNotebooks() {
 }
 
 func AddMainKeyboardShortcuts() {
-	// Add a standard shortcut (Ctrl+S)
-	ctrl_p := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyP,
-		Modifier: fyne.KeyModifierControl,
-	}
+	//Add keyboard shortcut for edit mode
+	mainWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
+		SetEditMode(mainWindow)
+	})
+
+	//Add keyboard shortcut for view mode
+	/*mainWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
+	SetViewMode(mainWindow)
+	})*/
 
 	//Keyboard shortcut to show Pinned Notes
 	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
@@ -521,10 +525,6 @@ func AddMainKeyboardShortcuts() {
 			log.Panic(err)
 		}
 	})
-	ctrl_r := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyR,
-		Modifier: fyne.KeyModifierControl,
-	}
 
 	//Keyboard shortcut to show Recent notes
 	mainWindow.Canvas().AddShortcut(ctrl_r, func(shortcut fyne.Shortcut) {
@@ -539,30 +539,16 @@ func AddMainKeyboardShortcuts() {
 		}
 	})
 
-	//Keyboard shortcut to show search panel
-	ctrl_f := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyF,
-		Modifier: fyne.KeyModifierControl,
-	}
-
 	mainWindow.Canvas().AddShortcut(ctrl_f, func(shortcut fyne.Shortcut) {
 		ShowSearchPanel()
 	})
 
 	//Keyboard shortcut to create a new note
-	ctrl_shift_n := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyN,
-		Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
-	}
 	mainWindow.Canvas().AddShortcut(ctrl_shift_n, func(shortcut fyne.Shortcut) {
 		CreateNewNote()
 	})
 
 	//Keyboard shortcut to show notebooks list
-	ctrl_n := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyN,
-		Modifier: fyne.KeyModifierControl,
-	}
 	mainWindow.Canvas().AddShortcut(ctrl_n, func(shortcut fyne.Shortcut) {
 		ShowNotebooks()
 	})

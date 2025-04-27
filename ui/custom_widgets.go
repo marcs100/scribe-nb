@@ -41,11 +41,7 @@ func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
 		fmt.Println("** Not a custom shortcut!!")
 		return
 	}
-	//var name = cs.ShortcutName()
-	if m.onCustomShortCut == nil {
-		fmt.Println("********Error nil ref to m.OnCustomShortcut()********")
-		return
-	}
+
 	m.onCustomShortCut(cs)
 }
 
@@ -58,26 +54,29 @@ func NewEntryCustom(onCustomShortcut func(cs *desktop.CustomShortcut)) *EntryCus
 	return e
 }
 
-type BorderCustom struct {
-	//container.border
-}
-
 /*
-type buttonWithPos struct {
-	widget.Button
-	OnTapped func(*fyne.PointEvent)
+//The code below is pointless becuase widget.RichText is not focusable.
+//Only widgets that are focusable can receive keybard shortcuts
+type RichTextFromMarkdownCustom struct {
+	widget.RichText
+	onCustomShortCut func(cs *desktop.CustomShortcut)
 }
 
-//Implement onTapped with mouse position for this widget
-func (bn *buttonWithPos) Tapped(e *fyne.PointEvent) {
-	if bn.OnTapped != nil {
-		bn.OnTapped(e)
+func (md *RichTextFromMarkdownCustom) TypedShortcut(s fyne.Shortcut) {
+	var ok bool
+	var cs *desktop.CustomShortcut
+	if cs, ok = s.(*desktop.CustomShortcut); !ok {
+		fmt.Println("** Not a custom shortcut!!")
+		return
 	}
+	//var name = cs.ShortcutName()
+	md.onCustomShortCut(cs)
 }
 
-func NewButtonWithPos(label string, tapped func(*fyne.PointEvent)) *buttonWithPos {
-	bn := &buttonWithPos{}
-	bn.Text = label
-	bn.OnTapped = tapped
-	return bn
-}*/
+func NewRichTextFromMarkdownCustom(content string, onCustomShortcut func(cs *desktop.CustomShortcut)) *RichTextFromMarkdownCustom {
+	md := &RichTextFromMarkdownCustom{}
+	md.onCustomShortCut = onCustomShortcut
+	md.AppendMarkdown(content)
+	md.ExtendBaseWidget(md)
+	return md
+	}*/
