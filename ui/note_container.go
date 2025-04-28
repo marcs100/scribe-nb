@@ -80,6 +80,8 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 			PinNote(noteInfo)
 		case ctrl_shift_c.ShortcutName():
 			ChangeNoteColour(noteInfo, parentWindow)
+		case ctrl_shift_i.ShortcutName():
+			go ShowProperties(noteInfo)
 		}
 	})
 
@@ -140,7 +142,7 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 		DeleteNote(noteInfo, parentWindow)
 	})
 
-	propertiesButton := widget.NewButtonWithIcon("", theme.InfoIcon(), func() { ShowProperties(noteInfo) })
+	propertiesButton := widget.NewButtonWithIcon("", theme.InfoIcon(), func() { go ShowProperties(noteInfo) })
 
 	NoteWidgets.deleteButton.Hide()
 
@@ -295,10 +297,11 @@ func PinNote(noteInfo *note.NoteInfo) {
 		}
 	}
 
+	UpdateProperties(noteInfo)
+
 	if AppStatus.currentView == VIEW_PINNED {
 		UpdateView() //updates view on main window
 	}
-	UpdateProperties(noteInfo)
 }
 
 func SetEditMode(parentWindow fyne.Window) {
@@ -388,4 +391,31 @@ func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 			go UpdateView()
 		}
 	}
+}
+
+func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
+	//Keyboard shortcut to set edit mode
+	parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
+		SetEditMode(parentWindow)
+	})
+
+	//Keyboard shortcut to set view mode
+	/*parentWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
+	SetViewMode(parentWindow)
+	})*/
+
+	//Keyboard shortcut to pin/unpin notes
+	parentWindow.Canvas().AddShortcut(ctrl_shift_p, func(shortcut fyne.Shortcut) {
+		PinNote(noteInfo)
+	})
+
+	//Keyboard shortcut to change note colour
+	parentWindow.Canvas().AddShortcut(ctrl_shift_c, func(shortcut fyne.Shortcut) {
+		ChangeNoteColour(noteInfo, parentWindow)
+	})
+
+	//Keyboard shortcut to show properties panel
+	parentWindow.Canvas().AddShortcut(ctrl_shift_i, func(shortcut fyne.Shortcut) {
+		go ShowProperties(noteInfo)
+	})
 }

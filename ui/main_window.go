@@ -334,6 +334,10 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 		PageView.CurrentPage = 1
 	}
 
+	if PageView.NumberOfPages == 0 {
+		return
+	}
+
 	var noteId = notes[PageView.CurrentPage-1].Id
 
 	AppWidgets.pageLabel.SetText(PageView.GetLabelText())
@@ -504,9 +508,9 @@ func ShowNotebooks() {
 
 func AddMainKeyboardShortcuts() {
 	//Add keyboard shortcut for edit mode
-	mainWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
+	/*mainWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
 		SetEditMode(mainWindow)
-	})
+	})*/
 
 	//Add keyboard shortcut for view mode
 	/*mainWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
@@ -552,5 +556,4 @@ func AddMainKeyboardShortcuts() {
 	mainWindow.Canvas().AddShortcut(ctrl_n, func(shortcut fyne.Shortcut) {
 		ShowNotebooks()
 	})
-
 }

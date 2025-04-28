@@ -20,10 +20,12 @@ func NewProperetiesPanel() *fyne.Container {
 
 func ShowProperties(noteInfo *note.NoteInfo) {
 	if NoteContainers.propertiesPanel.Hidden {
+		//fmt.Println("Will show properties panel")
 		text := note.GetPropertiesText(noteInfo)
 		NoteWidgets.propertiesText.SetText(text)
 		NoteContainers.propertiesPanel.Show()
 	} else {
+		//fmt.Println("Will hide properties panel")
 		NoteContainers.propertiesPanel.Hide()
 		AppContainers.singleNoteStack.Refresh() //only needed for single page view - IMPROVE THIS!!!!!!!
 	}

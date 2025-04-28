@@ -64,3 +64,9 @@ var ctrl_shift_b = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyB,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
+
+// show information (properties)
+var ctrl_shift_i = &desktop.CustomShortcut{
+	KeyName:  fyne.KeyI,
+	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
+}

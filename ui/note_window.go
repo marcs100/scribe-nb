@@ -51,25 +51,3 @@ func OpenNoteWindow(noteId uint) {
 
 	noteWindow.Show()
 }
-
-func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
-	//Keyboard shortcut to set edit mode
-	parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
-		SetEditMode(parentWindow)
-	})
-
-	//Keyboard shortcut to set view mode
-	/*parentWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
-	SetViewMode(parentWindow)
-	})*/
-
-	//Keyboard shortcut to pin/unpin notes
-	parentWindow.Canvas().AddShortcut(ctrl_shift_p, func(shortcut fyne.Shortcut) {
-		PinNote(noteInfo)
-	})
-
-	//Keyboard shortcut to change note colour
-	parentWindow.Canvas().AddShortcut(ctrl_shift_c, func(shortcut fyne.Shortcut) {
-		ChangeNoteColour(noteInfo, parentWindow)
-	})
-}
