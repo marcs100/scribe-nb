@@ -355,7 +355,7 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 
 	var allowEdit bool = true
 	if slices.Contains(AppStatus.openNotes, noteId) {
-		dialog.ShowInformation("Warning", "This note is already open in a seoarate window.\nClose it first if you want to edit it here!", mainWindow)
+		dialog.ShowInformation("Warning", "This note is already open in a separate window.\nClose it first if you want to edit it here!", mainWindow)
 		allowEdit = false
 	}
 
