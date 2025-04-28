@@ -27,7 +27,7 @@ func OpenNoteWindow(noteId uint) {
 	}
 
 	noteWindow := mainApp.NewWindow("")
-	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, noteWindow)
+	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, true, noteWindow)
 	//fmt.Println(fmt.Sprintf("************Notebook is %s", "debug"))
 	noteWindow.SetTitle(fmt.Sprintf("Notebook: %s", noteInfo.Notebook))
 	noteWindow.Resize(fyne.NewSize(900, 750))
@@ -43,7 +43,7 @@ func OpenNoteWindow(noteId uint) {
 		}
 	})
 
-	AddNoteKeyboardShortcuts(&noteInfo, noteWindow)
+	AddNoteKeyboardShortcuts(&noteInfo, true, noteWindow)
 
 	if noteInfo.NewNote {
 		SetEditMode(noteWindow)

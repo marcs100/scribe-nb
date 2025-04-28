@@ -30,26 +30,33 @@ func NewScribeNoteText(content string, tapped func()) *scribeNoteText {
 type EntryCustom struct {
 	widget.Entry
 	onCustomShortCut func(cs *desktop.CustomShortcut)
+	onFocusLost      func()
 }
 
-func (m *EntryCustom) TypedShortcut(s fyne.Shortcut) {
+func (e *EntryCustom) TypedShortcut(s fyne.Shortcut) {
 	var ok bool
 	var cs *desktop.CustomShortcut
 	if cs, ok = s.(*desktop.CustomShortcut); !ok {
 		//fmt.Printf("shortcut name is %s", cs.ShortcutName())
-		m.Entry.TypedShortcut(s) //not a customshort cut - pass through to normal predifined shortcuts
+		e.Entry.TypedShortcut(s) //not a customshort cut - pass through to normal predifined shortcuts
 		fmt.Println("** Not a custom shortcut!!")
 		return
 	}
 
-	m.onCustomShortCut(cs)
+	e.onCustomShortCut(cs)
 }
 
-func NewEntryCustom(onCustomShortcut func(cs *desktop.CustomShortcut)) *EntryCustom {
+func (e *EntryCustom) FocusLost() {
+	e.Entry.FocusLost()
+	e.onFocusLost()
+}
+
+func NewEntryCustom(onCustomShortcut func(cs *desktop.CustomShortcut), onFocusLost func()) *EntryCustom {
 	e := &EntryCustom{}
 	e.MultiLine = true
 	e.Wrapping = fyne.TextWrapWord
 	e.onCustomShortCut = onCustomShortcut
+	e.onFocusLost = onFocusLost
 	e.ExtendBaseWidget(e)
 	return e
 }

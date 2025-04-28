@@ -16,7 +16,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData, parentWindow fyne.Window) *fyne.Container {
+func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData, allowEdit bool, parentWindow fyne.Window) *fyne.Container {
 	//var err error
 	//var retrievedNote scribedb.NoteData
 	//var noteInfo note.NoteInfo
@@ -83,7 +83,7 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 		case ctrl_shift_i.ShortcutName():
 			go ShowProperties(noteInfo)
 		}
-	})
+	}, func() { SaveNote(noteInfo, retrievedNote) })
 
 	//NoteWidgets.entry = widget.NewMultiLineEntry()
 	NoteWidgets.entry.Text = noteInfo.Content
@@ -149,11 +149,17 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	NoteWidgets.modeSelect = widget.NewRadioGroup([]string{EDIT_MODE, VIEW_MODE}, func(value string) {
 		switch value {
 		case EDIT_MODE:
-			SetEditMode(parentWindow)
+			if allowEdit {
+				SetEditMode(parentWindow)
+			}
 		case VIEW_MODE:
 			SetViewMode(parentWindow)
 		}
 	})
+
+	if !allowEdit {
+		NoteWidgets.modeSelect.Hide()
+	}
 
 	NoteContainers.propertiesPanel = NewProperetiesPanel()
 
@@ -393,16 +399,13 @@ func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 	}
 }
 
-func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
+func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, allowEdit bool, parentWindow fyne.Window) {
 	//Keyboard shortcut to set edit mode
-	parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
-		SetEditMode(parentWindow)
-	})
-
-	//Keyboard shortcut to set view mode
-	/*parentWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
-	SetViewMode(parentWindow)
-	})*/
+	if allowEdit {
+		parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
+			SetEditMode(parentWindow)
+		})
+	}
 
 	//Keyboard shortcut to pin/unpin notes
 	parentWindow.Canvas().AddShortcut(ctrl_shift_p, func(shortcut fyne.Shortcut) {

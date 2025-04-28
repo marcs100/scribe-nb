@@ -353,8 +353,14 @@ func ShowNotesAsPages(notes []scribedb.NoteData) {
 		}
 	}
 
-	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, mainWindow)
-	AddNoteKeyboardShortcuts(&noteInfo, mainWindow)
+	var allowEdit bool = true
+	if slices.Contains(AppStatus.openNotes, noteId) {
+		dialog.ShowInformation("Warning", "This note is already open in a seoarate window.\nClose it first if you want to edit it here!", mainWindow)
+		allowEdit = false
+	}
+
+	noteContainer := NewNoteContainer(noteId, &noteInfo, &retrievedNote, allowEdit, mainWindow)
+	AddNoteKeyboardShortcuts(&noteInfo, allowEdit, mainWindow)
 	AppContainers.singleNoteStack.Add(noteContainer)
 	AppContainers.mainPageContainer.Show()
 	AppContainers.mainPageContainer.Refresh()
@@ -507,16 +513,6 @@ func ShowNotebooks() {
 }
 
 func AddMainKeyboardShortcuts() {
-	//Add keyboard shortcut for edit mode
-	/*mainWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
-		SetEditMode(mainWindow)
-	})*/
-
-	//Add keyboard shortcut for view mode
-	/*mainWindow.Canvas().AddShortcut(ctrl_shift_q, func(shortcut fyne.Shortcut) {
-	SetViewMode(mainWindow)
-	})*/
-
 	//Keyboard shortcut to show Pinned Notes
 	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
 		var err error
