@@ -1,20 +1,29 @@
 package ui
 
 import (
+	"log"
+	"scribe-nb/scribedb"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 )
 
-func BackupNotes(parentWindow fyne.Window) {
-	d := dialog.NewFolderOpen(func(dir fyne.ListableURI, err error) {
+func BackupNotes(dbFile string, parentWindow fyne.Window) {
+	d := dialog.NewFolderOpen(func(backupDir fyne.ListableURI, err error) {
 		if err == nil {
-			if dir != nil {
-				//call backup funtion in scribedb here!!!!!!!!!!!!!!!
+			if backupDir != nil {
+				bytesWrtten, err := scribedb.BackupDatabase(backupDir.Path(), dbFile)
+				if err == nil {
+					log.Printf("Database backed up - %d bytes written\n", bytesWrtten)
+				} else {
+					dialog.ShowError(err, parentWindow)
+				}
 			}
 		} else {
 			dialog.ShowError(err, parentWindow)
 		}
 
 	}, parentWindow)
+	d.SetConfirmText("Backup")
 	d.Show()
 }

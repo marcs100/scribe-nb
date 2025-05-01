@@ -118,6 +118,7 @@ func CreateTopPanel() *fyne.Container {
 	AppWidgets.pageLabel.Hide()
 
 	toolbar := widget.NewToolbar(
+		//show grid view
 		widget.NewToolbarAction(theme.GridIcon(), func() {
 			if AppStatus.currentLayout != LAYOUT_GRID {
 				AppStatus.currentLayout = LAYOUT_GRID
@@ -125,6 +126,7 @@ func CreateTopPanel() *fyne.Container {
 				UpdateView()
 			}
 		}),
+		//show single page view
 		widget.NewToolbarAction(theme.FileIcon(), func() {
 			if AppStatus.currentLayout != LAYOUT_PAGE {
 				AppStatus.currentLayout = LAYOUT_PAGE
@@ -132,12 +134,14 @@ func CreateTopPanel() *fyne.Container {
 				UpdateView()
 			}
 		}),
+		//page forward
 		widget.NewToolbarAction(theme.NavigateBackIcon(), func() {
 			if PageView.PageBack() > 0 {
 				UpdateView()
 			}
 
 		}),
+		//page back
 		widget.NewToolbarAction(theme.NavigateNextIcon(), func() {
 			if PageView.PageForward() > 0 {
 				UpdateView()
@@ -147,12 +151,14 @@ func CreateTopPanel() *fyne.Container {
 	)
 
 	settingsBar := widget.NewToolbar(
+		//backup database
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
-			fmt.Println("Backup pressed!")
-			BackupNotes(mainWindow)
+			BackupNotes(Conf.Settings.Database, mainWindow)
 		}),
+
+		//display settings
 		widget.NewToolbarAction(theme.SettingsIcon(), func() {
-			fmt.Println("Setting pressed")
+			fmt.Println("Settings pressed")
 		}),
 	)
 
