@@ -149,6 +149,7 @@ func CreateTopPanel() *fyne.Container {
 	settingsBar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
 			fmt.Println("Backup pressed!")
+			BackupNotes(mainWindow)
 		}),
 		widget.NewToolbarAction(theme.SettingsIcon(), func() {
 			fmt.Println("Setting pressed")
