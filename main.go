@@ -11,7 +11,7 @@ import (
 	"scribe-nb/ui"
 )
 
-const VERSION = "0.7"
+const VERSION = "0.9"
 
 func main() {
 	var err error
