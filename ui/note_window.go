@@ -13,7 +13,7 @@ import (
 	//"github.com/fyne-io/terminal"
 )
 
-func OpenNoteWindow(noteId uint) {
+func NewNoteWindow(noteId uint) {
 	var noteInfo note.NoteInfo
 	var retrievedNote scribedb.NoteData
 	var err error

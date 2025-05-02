@@ -158,7 +158,7 @@ func CreateTopPanel() *fyne.Container {
 
 		//display settings
 		widget.NewToolbarAction(theme.SettingsIcon(), func() {
-			fmt.Println("Settings pressed")
+			NewSettingsWindow()
 		}),
 	)
 
@@ -306,7 +306,7 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
 				fmt.Println("note is already open")
 			} else {
 				AppStatus.openNotes = append(AppStatus.openNotes, notes[i].Id)
-				OpenNoteWindow(notes[i].Id)
+				NewNoteWindow(notes[i].Id)
 			}
 		})
 		richText.Wrapping = fyne.TextWrapWord
@@ -503,7 +503,7 @@ func CreateNewNote() {
 	if AppContainers.searchPanel != nil {
 		AppContainers.searchPanel.Hide()
 	}
-	OpenNoteWindow(0) //new note has id=0
+	NewNoteWindow(0) //new note has id=0
 }
 
 func ShowNotebooks() {
