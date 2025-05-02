@@ -313,7 +313,7 @@ func ShowNotesInGrid(notes []scribedb.NoteData, noteSize fyne.Size) {
 		themeBackground := canvas.NewRectangle(AppTheme.NoteBgColour)
 		noteColour, _ := RGBStringToFyneColor(notes[i].BackgroundColour)
 		noteBackground := canvas.NewRectangle(noteColour)
-		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF" {
+		if notes[i].BackgroundColour == "#e7edef" || notes[i].BackgroundColour == "#FFFFFF" || notes[i].BackgroundColour == "#000000" {
 			noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 		}
 
