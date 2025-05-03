@@ -2,7 +2,9 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -21,6 +23,7 @@ func NewSettingsWindow() {
 	AppTheme = GetThemeColours(themeVar)
 
 	settingsWindow := mainApp.NewWindow("Settings")
+	settingsWindow.Resize(fyne.NewSize(500, 400))
 
 	bg := canvas.NewRectangle(AppTheme.MainBgColour)
 
@@ -35,7 +38,13 @@ func NewSettingsWindow() {
 	recentNotesLimitLabel := widget.NewLabel("  Recent Note Limit:")
 	recentNotesLimitEntry := widget.NewEntry()
 	recentNotesLimitEntry.SetText(fmt.Sprintf("%d", Conf.Settings.RecentNotesLimit))
-	//notesLimitHBox := container.NewHBox(recentNotesLimitLabel, recentNotesLimitEntry)
+	recentNotesLimitEntry.OnChanged = func(input string) {
+		_, err := strconv.Atoi(input)
+		if err != nil {
+			recentNotesLimitEntry.SetText("")
+		}
+	}
+
 	notesLimitGrid := container.NewGridWithRows(1, recentNotesLimitLabel, recentNotesLimitEntry)
 
 	layoutHeading := widget.NewRichTextFromMarkdown("### Layout")
@@ -48,11 +57,33 @@ func NewSettingsWindow() {
 
 	gridLimitLabel := widget.NewLabel("  Notes per Page Limit:")
 	gridLimitEntry := widget.NewEntry()
+	gridLimitEntry.OnChanged = func(input string) {
+		_, err := strconv.Atoi(input)
+		if err != nil {
+			gridLimitEntry.SetText("")
+		}
+	}
 	gridLimitStack := container.NewStack(gridLimitEntry)
 	gridLimitGrid := container.NewGridWithRows(1, gridLimitLabel, gridLimitStack)
 	gridLimitEntry.SetText(fmt.Sprintf("%d", Conf.Settings.GridMaxPages))
 
-	vbox := container.NewVBox(viewHeading, viewGrid, notesLimitGrid, layoutHeading, layoutGrid, gridLimitGrid)
+	appearanceHeading := widget.NewRichTextFromMarkdown("### Appearance")
+	appearanceLabel := widget.NewLabel("  Theme:")
+	appearanceSelect := widget.NewSelect([]string{"light", "dark", "system"}, func(sel string) {
+		Conf.Settings.ThemeVariant = sel
+	})
+	appearanceSelect.Selected = Conf.Settings.ThemeVariant
+	appearanceGrid := container.NewGridWithRows(1, appearanceLabel, appearanceSelect)
+
+	vbox := container.NewVBox(
+		viewHeading,
+		viewGrid,
+		notesLimitGrid,
+		layoutHeading,
+		layoutGrid,
+		gridLimitGrid,
+		appearanceHeading,
+		appearanceGrid)
 
 	stack := container.NewStack(bg, vbox)
 

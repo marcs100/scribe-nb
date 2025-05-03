@@ -93,7 +93,7 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	noteColour, _ := RGBStringToFyneColor(noteInfo.Colour)
 
 	NoteCanvas.noteBackground = canvas.NewRectangle(noteColour)
-	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "#000000" {
+	if noteInfo.Colour == "#e7edef" || noteInfo.Colour == "#FFFFFF" || noteInfo.Colour == "#ffffff" || noteInfo.Colour == "#000000" {
 		NoteCanvas.noteBackground = canvas.NewRectangle(AppTheme.NoteBgColour) // colour not set or using the old scribe default note colour
 	}
 
