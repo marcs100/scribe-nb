@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"scribe-nb/config"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -11,6 +12,9 @@ import (
 )
 
 func NewSettingsWindow() {
+	
+	origConf := CopySettings()
+	
 	var themeVar theme_variant
 	switch Conf.Settings.ThemeVariant {
 	case "light":
@@ -89,4 +93,24 @@ func NewSettingsWindow() {
 
 	settingsWindow.SetContent(stack)
 	settingsWindow.Show()
+}
+
+func CopySettings() config.Config{
+	return config.Config{
+		Title: Conf.Title,
+		Settings: config.AppSettings{
+			Database: Conf.Settings.Database,
+			RecentNotesLimit: Conf.Settings.RecentNotesLimit,
+			NoteWidth: Conf.Settings.NoteWidth,
+			NoteHeight: Conf.Settings.NoteHeight,
+			InitialView: Conf.Settings.InitialView,
+			InitialLayout: Conf.Settings.InitialLayout,
+			GridMaxPages: Conf.Settings.GridMaxPages,
+			ThemeVariant: Conf.Settings.ThemeVariant,
+			DarkColourNote: Conf.Settings.DarkColourNote,
+			LightColourNote: Conf.Settings.LightColourNote,
+			DarkColourBg: Conf.Settings.DarkColourBg,
+			LightColourBg: Conf.Settings.LightColourBg,
+		},
+	}
 }
