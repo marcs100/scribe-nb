@@ -21,9 +21,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func StartUI(appConfigIn *config.Config, version string) {
+func StartUI(appConfigIn *config.Config, configFile string, version string) {
 	Conf = appConfigIn
 	mainApp = app.NewWithID("scribe-nb")
+	AppStatus.configFile = configFile
 	CreateMainWindow(version)
 }
 

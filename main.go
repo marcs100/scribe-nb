@@ -72,7 +72,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	ui.StartUI(appConfig, VERSION)
+	ui.StartUI(appConfig, confFile, VERSION)
 }
 
 func CreateAppConfig(homeDir string) config.Config {

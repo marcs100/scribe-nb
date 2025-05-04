@@ -75,6 +75,7 @@ type ApplicationWidgets struct {
 }
 
 type ApplicationStatus struct {
+	configFile      string
 	currentView     string
 	currentNotebook string
 	currentLayout   string
