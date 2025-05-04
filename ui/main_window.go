@@ -32,6 +32,7 @@ func CreateMainWindow(version string) {
 
 	AppStatus.noteSize = fyne.NewSize(Conf.Settings.NoteWidth, Conf.Settings.NoteHeight)
 
+	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 	var themeVar theme_variant
 	switch Conf.Settings.ThemeVariant {
 	case "light":
@@ -43,8 +44,6 @@ func CreateMainWindow(version string) {
 	}
 
 	AppTheme = GetThemeColours(themeVar)
-
-	mainWindow = mainApp.NewWindow(fmt.Sprintf("Scribe-NB   v%s", version))
 
 	//Main Grid container for displaying notes
 	grid := container.NewGridWrap(AppStatus.noteSize)

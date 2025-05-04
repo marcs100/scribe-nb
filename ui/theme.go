@@ -34,10 +34,33 @@ func GetThemeColours(themeVarIn theme_variant) AppColours {
 			log.Panicln(err)
 		}
 	case SYSTEM_THEME:
-		fmt.Println("Using System theme")
 		themeVariant := mainApp.Settings().ThemeVariant()
-		appColours.MainBgColour = mainApp.Settings().Theme().Color(theme.ColorNameBackground, themeVariant)
-		appColours.NoteBgColour = appColours.MainBgColour
+		if themeVariant == theme.VariantDark {
+			log.Println("using system theme dark")
+			appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourBg)
+			if err != nil {
+				log.Panicln(err)
+			}
+			appColours.NoteBgColour, err = RGBStringToFyneColor(Conf.Settings.DarkColourNote)
+			if err != nil {
+				log.Panicln(err)
+			}
+
+		} else if themeVariant == theme.VariantLight {
+			log.Println("Using system theme light")
+			appColours.MainBgColour, err = RGBStringToFyneColor(Conf.Settings.LightColourBg)
+			if err != nil {
+				log.Panicln(err)
+			}
+			appColours.NoteBgColour, err = RGBStringToFyneColor(Conf.Settings.LightColourNote)
+			if err != nil {
+				log.Panicln(err)
+			}
+		} else {
+			log.Println("Unidentified system theme variant!!!")
+			appColours.MainBgColour = mainApp.Settings().Theme().Color(theme.ColorNameBackground, themeVariant)
+			appColours.NoteBgColour = mainApp.Settings().Theme().Color(theme.ColorNameForeground, themeVariant)
+		}
 	}
 	return appColours
 }
