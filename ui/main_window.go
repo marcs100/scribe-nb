@@ -548,6 +548,18 @@ func AddMainKeyboardShortcuts() {
 		}
 	})
 
+	mainWindow.Canvas().AddShortcut(scPageForward, func(shortcut fyne.Shortcut) {
+		if PageView.PageForward() > 0 {
+			UpdateView()
+		}
+	})
+
+	mainWindow.Canvas().AddShortcut(scPageBack, func(shortcut fyne.Shortcut) {
+		if PageView.PageBack() > 0 {
+			UpdateView()
+		}
+	})
+
 	mainWindow.Canvas().AddShortcut(scFind, func(shortcut fyne.Shortcut) {
 		ShowSearchPanel()
 	})

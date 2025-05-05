@@ -35,6 +35,16 @@ var scOpenNote = &desktop.CustomShortcut{
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
+var scPageForward = &desktop.CustomShortcut{
+	KeyName:  fyne.KeyPeriod,
+	Modifier: fyne.KeyModifierControl,
+}
+
+var scPageBack = &desktop.CustomShortcut{
+	KeyName:  fyne.KeyComma,
+	Modifier: fyne.KeyModifierControl,
+}
+
 // Set edit mode
 var scEditMode = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyE,
