@@ -74,13 +74,13 @@ func NewNoteContainer(noteId uint, noteInfo *note.NoteInfo, retrievedNote *scrib
 	//setup keyboard shortcuts
 	NoteWidgets.entry = NewEntryCustom(func(cs *desktop.CustomShortcut) {
 		switch cs.ShortcutName() {
-		case ctrl_shift_q.ShortcutName():
+		case scViewMode.ShortcutName():
 			SetViewMode(parentWindow)
-		case ctrl_shift_p.ShortcutName():
+		case scPinNote.ShortcutName():
 			PinNote(noteInfo)
-		case ctrl_shift_c.ShortcutName():
+		case scNoteColour.ShortcutName():
 			ChangeNoteColour(noteInfo, parentWindow)
-		case ctrl_shift_i.ShortcutName():
+		case scShowInfo.ShortcutName():
 			go ShowProperties(noteInfo)
 		}
 	}, func() { SaveNote(noteInfo, retrievedNote) })
@@ -402,23 +402,23 @@ func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 func AddNoteKeyboardShortcuts(noteInfo *note.NoteInfo, allowEdit bool, parentWindow fyne.Window) {
 	//Keyboard shortcut to set edit mode
 	if allowEdit {
-		parentWindow.Canvas().AddShortcut(ctrl_shift_e, func(shortcut fyne.Shortcut) {
+		parentWindow.Canvas().AddShortcut(scEditMode, func(shortcut fyne.Shortcut) {
 			SetEditMode(parentWindow)
 		})
 	}
 
 	//Keyboard shortcut to pin/unpin notes
-	parentWindow.Canvas().AddShortcut(ctrl_shift_p, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(scPinNote, func(shortcut fyne.Shortcut) {
 		PinNote(noteInfo)
 	})
 
 	//Keyboard shortcut to change note colour
-	parentWindow.Canvas().AddShortcut(ctrl_shift_c, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(scNoteColour, func(shortcut fyne.Shortcut) {
 		ChangeNoteColour(noteInfo, parentWindow)
 	})
 
 	//Keyboard shortcut to show properties panel
-	parentWindow.Canvas().AddShortcut(ctrl_shift_i, func(shortcut fyne.Shortcut) {
+	parentWindow.Canvas().AddShortcut(scShowInfo, func(shortcut fyne.Shortcut) {
 		go ShowProperties(noteInfo)
 	})
 }

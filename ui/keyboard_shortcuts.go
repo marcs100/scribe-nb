@@ -6,67 +6,67 @@ import (
 )
 
 // View pinned notes
-var ctrl_p = &desktop.CustomShortcut{
+var scViewPinned = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyP,
 	Modifier: fyne.KeyModifierControl,
 }
 
 // View recent Notes
-var ctrl_r = &desktop.CustomShortcut{
+var scViewRecent = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyR,
 	Modifier: fyne.KeyModifierControl,
 }
 
 // View Notebooks (toggles notebook list panel)
-var ctrl_n = &desktop.CustomShortcut{
+var scShowNotebooks = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyN,
 	Modifier: fyne.KeyModifierControl,
 }
 
 // open search panel
-var ctrl_f = &desktop.CustomShortcut{
+var scFind = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyF,
 	Modifier: fyne.KeyModifierControl,
 }
 
 // Open a new note
-var ctrl_shift_n = &desktop.CustomShortcut{
+var scOpenNote = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyN,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
 // Set edit mode
-var ctrl_shift_e = &desktop.CustomShortcut{
+var scEditMode = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyE,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
 // Set view mode
-var ctrl_shift_q = &desktop.CustomShortcut{
+var scViewMode = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyQ,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
 // Pin note
-var ctrl_shift_p = &desktop.CustomShortcut{
+var scPinNote = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyP,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
 // Change note colour
-var ctrl_shift_c = &desktop.CustomShortcut{
+var scNoteColour = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyC,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
-// Open notebooks menu
-var ctrl_shift_b = &desktop.CustomShortcut{
+// Open notebooks menu *** NOT IN USE ******************
+var scChangeNoteNotebook = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyB,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }
 
 // show information (properties)
-var ctrl_shift_i = &desktop.CustomShortcut{
+var scShowInfo = &desktop.CustomShortcut{
 	KeyName:  fyne.KeyI,
 	Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }

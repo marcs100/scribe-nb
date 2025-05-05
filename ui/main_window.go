@@ -523,7 +523,7 @@ func ShowNotebooks() {
 
 func AddMainKeyboardShortcuts() {
 	//Keyboard shortcut to show Pinned Notes
-	mainWindow.Canvas().AddShortcut(ctrl_p, func(shortcut fyne.Shortcut) {
+	mainWindow.Canvas().AddShortcut(scViewPinned, func(shortcut fyne.Shortcut) {
 		var err error
 		AppStatus.currentView = VIEW_PINNED
 		PageView.Reset()
@@ -536,7 +536,7 @@ func AddMainKeyboardShortcuts() {
 	})
 
 	//Keyboard shortcut to show Recent notes
-	mainWindow.Canvas().AddShortcut(ctrl_r, func(shortcut fyne.Shortcut) {
+	mainWindow.Canvas().AddShortcut(scViewRecent, func(shortcut fyne.Shortcut) {
 		var err error
 		AppStatus.currentView = VIEW_RECENT
 		PageView.Reset()
@@ -548,17 +548,17 @@ func AddMainKeyboardShortcuts() {
 		}
 	})
 
-	mainWindow.Canvas().AddShortcut(ctrl_f, func(shortcut fyne.Shortcut) {
+	mainWindow.Canvas().AddShortcut(scFind, func(shortcut fyne.Shortcut) {
 		ShowSearchPanel()
 	})
 
 	//Keyboard shortcut to create a new note
-	mainWindow.Canvas().AddShortcut(ctrl_shift_n, func(shortcut fyne.Shortcut) {
+	mainWindow.Canvas().AddShortcut(scOpenNote, func(shortcut fyne.Shortcut) {
 		CreateNewNote()
 	})
 
 	//Keyboard shortcut to show notebooks list
-	mainWindow.Canvas().AddShortcut(ctrl_n, func(shortcut fyne.Shortcut) {
+	mainWindow.Canvas().AddShortcut(scShowNotebooks, func(shortcut fyne.Shortcut) {
 		ShowNotebooks()
 	})
 }
