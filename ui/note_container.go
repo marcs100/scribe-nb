@@ -359,6 +359,12 @@ func ChangeNoteColour(noteInfo *note.NoteInfo, parentWindow fyne.Window) {
 func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 	noteInfo.Content = NoteWidgets.entry.Text
 	var noteChanges note.NoteChanges
+
+	if noteInfo.Deleted {
+		go UpdateView()
+		return
+	}
+
 	if noteInfo.NewNote {
 		if noteInfo.Content != "" {
 			noteChanges.ContentChanged = true
@@ -372,13 +378,17 @@ func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 		if err != nil {
 			log.Println("Error saving note")
 			dialog.ShowError(err, mainWindow)
-			//log.Panic()
+			return
 		}
 
 		if res == 0 {
 			log.Println("No note was saved (affected rows = 0)")
 		} else {
-			log.Println("....Note updates successfully....")
+			log.Println("....Note updated successfully....")
+			if *retrievedNote, err = scribedb.GetNote(noteInfo.Id); err != nil {
+				log.Println("Error getting updated note")
+				dialog.ShowError(err, mainWindow)
+			}
 			go UpdateView()
 		}
 	} else if noteChanges.PinStatusChanged {
@@ -387,13 +397,18 @@ func SaveNote(noteInfo *note.NoteInfo, retrievedNote *scribedb.NoteData) {
 		if err != nil {
 			log.Println("Error saving note")
 			dialog.ShowError(err, mainWindow)
+			return
 			//log.Panic()
 		}
 
 		if res == 0 {
 			log.Println("No note was saved (affected rows = 0)")
 		} else {
-			log.Println("....Note updates successfully....")
+			log.Println("....Note updated successfully....")
+			if *retrievedNote, err = scribedb.GetNote(noteInfo.Id); err != nil {
+				log.Println("Error getting updated note")
+				dialog.ShowError(err, mainWindow)
+			}
 			go UpdateView()
 		}
 	}

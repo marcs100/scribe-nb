@@ -24,25 +24,30 @@ func CheckChanges(orig_db *scribedb.NoteData, currentNote *NoteInfo) NoteChanges
 
 	//recalculate the hash for changes
 	if currentNote.Hash != calcHash(currentNote.Content) {
+		//fmt.Println("hash mismatch!!!!!!!!") // ******* Debug only **************
 		noteChanges.ContentChanged = true
 	}
 
 	if currentNote.Deleted {
 		noteChanges.ContentChanged = true
+		//fmt.Println("note deleted!!!!!!!!") // ******* Debug only **************
 	}
 
 	if orig_db.Pinned > 0 && !currentNote.Pinned {
 		noteChanges.PinStatusChanged = true
+		//fmt.Println("pinned status changed!!!!!!!!") // ******* Debug only **************
 	} else if orig_db.Pinned == 0 && currentNote.Pinned {
 		noteChanges.PinStatusChanged = true
 	}
 
 	if orig_db.BackgroundColour != currentNote.Colour {
 		noteChanges.ParamsChanged = true
+		//fmt.Println("note colour changed!!!!!!!!") // ******* Debug only **************
 	}
 
 	if orig_db.Notebook != currentNote.Notebook {
 		noteChanges.ParamsChanged = true
+		//fmt.Println("notebook changed!!!!!!!!") // ******* Debug only **************
 	}
 
 	return noteChanges
@@ -55,14 +60,24 @@ func SaveNote(note *NoteInfo) (int64, error) {
 	}
 	var res int64
 	var err error
+	var id int64
+
 	if note.Deleted {
 		return 1, err //dont save note that has been deleted from the database
 	}
 
 	if note.NewNote {
-		res, err = scribedb.InsertNote(note.Notebook, note.Content, pinned, note.PinnedDate, note.Colour)
+		res, id, err = scribedb.InsertNote(note.Notebook, note.Content, pinned, note.PinnedDate, note.Colour)
+		if err == nil {
+			note.NewNote = false
+			note.Id = uint(id)
+		}
 	} else {
 		res, err = scribedb.SaveNote(note.Id, note.Notebook, note.Content, pinned, note.PinnedDate, note.Colour)
+	}
+
+	if err == nil {
+		note.Hash = calcHash(note.Content) // update hash for saved note
 	}
 
 	return res, err

@@ -51,9 +51,10 @@ func SaveNoteNoTimeStamp(id uint, notebook string, content string, pinned uint, 
 	return rows, err
 }
 
-func InsertNote(notebook string, content string, pinned uint, pinnedDate string, colour string) (int64, error) {
+func InsertNote(notebook string, content string, pinned uint, pinnedDate string, colour string) (int64, int64, error) {
+	var id int64 = -1
 	if !connected {
-		return 0, errors.New("InsertNote: database not connected")
+		return 0, 0, errors.New("InsertNote: database not connected")
 	}
 
 	//calculate date created and modified
@@ -65,6 +66,7 @@ func InsertNote(notebook string, content string, pinned uint, pinnedDate string,
 
 	res, err := db.Exec("INSERT INTO notes VALUES(NULL,?,?,?,?,?,?,?)", notebook, content, created, modified, pinned, colour, pinnedDate)
 	rows, _ := res.RowsAffected()
+	id, _ = res.LastInsertId()
 
-	return rows, err
+	return rows, id, err
 }
