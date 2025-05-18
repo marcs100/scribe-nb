@@ -82,7 +82,7 @@ func CreateAppConfig(homeDir string) config.Config {
 		InitialLayout:    "grid",
 		InitialView:      "pinned",
 		NoteHeight:       350,
-		NoteWidth:        600,
+		NoteWidth:        500,
 		RecentNotesLimit: 50,
 		GridMaxPages:     500,
 		ThemeVariant:     "system",
