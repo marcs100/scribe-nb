@@ -85,7 +85,7 @@ func CreateAppConfig(homeDir string) config.Config {
 		NoteWidth:        600,
 		RecentNotesLimit: 50,
 		GridMaxPages:     500,
-		ThemeVariant:     "dark",
+		ThemeVariant:     "system",
 		DarkColourNote:   "#2f2f2f",
 		LightColourNote:  "#e2e2e2",
 		DarkColourBg:     "#1e1e1e",
